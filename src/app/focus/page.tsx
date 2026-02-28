@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
 import { ISRAEL_IRAN_CONTEXT } from "@/lib/conflict/israelIranContext";
 import { FOCUS_POV } from "@/components/globe/globeData";
+import GlobeWrapper from "@/components/globe/GlobeWrapper";
 
 export const metadata: Metadata = {
   title: "Israel–Iran Focus — Warspy",
   description: "Deep-dive on the Israel–Iran conflict theater: live events, proxy network, nuclear program, and historical timeline.",
 };
-
-const GlobeWrapper = dynamic(
-  () => import("@/components/globe/GlobeWrapper"),
-  { ssr: false, loading: () => <div style={{ height: "55vh", background: "#030508" }} /> }
-);
 
 export default function FocusPage() {
   return (
