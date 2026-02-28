@@ -418,3 +418,8 @@ body.crt-mode::after {
   z-index: 9998;
   background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%);
 }
+
+/* ─── Tooltips ─────────────────────────────────────────────────────────────── */
+.warspy-tooltip-wrap:hover .warspy-tooltip {
+  opacity: 1 !important;
+}
