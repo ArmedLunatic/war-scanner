@@ -1,21 +1,14 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePanels } from "@/lib/context/PanelContext";
 import type { PanelId } from "@/lib/context/PanelContext";
 import {
-  WARSPY_CA,
   WARSPY_DEV_X_HANDLE,
   WARSPY_DEV_X_URL,
-  WARSPY_TICKER,
   WARSPY_X_COMMUNITY_URL,
 } from "@/config";
-
-function truncateMiddle(value: string, start: number, end: number) {
-  if (value.length <= start + end + 1) return value;
-  return `${value.slice(0, start)}...${value.slice(-end)}`;
-}
 
 // ─── THREATCON Meter ─────────────────────────────────────────────────────────
 const THREATCON_LABELS = ["", "ALPHA", "BRAVO", "CHARLIE", "DELTA", "ECHO"];
@@ -166,22 +159,7 @@ const NAV_LINKS = [
 export function OverlayNav() {
   const { toggle, isOpen } = usePanels();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [isCompactDesktop, setIsCompactDesktop] = useState(false);
-  const copyTimerRef = useRef<number | null>(null);
-  const desktopCaLabel = truncateMiddle(
-    WARSPY_CA,
-    isCompactDesktop ? 5 : 7,
-    isCompactDesktop ? 4 : 6
-  );
-
-  useEffect(() => {
-    return () => {
-      if (copyTimerRef.current) {
-        window.clearTimeout(copyTimerRef.current);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     const onResize = () => setIsCompactDesktop(window.innerWidth < 1500);
@@ -189,19 +167,6 @@ export function OverlayNav() {
     window.addEventListener("resize", onResize, { passive: true });
     return () => window.removeEventListener("resize", onResize);
   }, []);
-
-  const copyContractAddress = async () => {
-    try {
-      await navigator.clipboard.writeText(WARSPY_CA);
-      setCopied(true);
-      if (copyTimerRef.current) {
-        window.clearTimeout(copyTimerRef.current);
-      }
-      copyTimerRef.current = window.setTimeout(() => setCopied(false), 1300);
-    } catch {
-      // noop
-    }
-  };
 
   return (
     <>
@@ -224,7 +189,7 @@ export function OverlayNav() {
           WebkitBackdropFilter: "blur(10px)",
         }}
       >
-        {/* Logo + CA */}
+        {/* Logo */}
         <div
           style={{
             display: "flex",
@@ -257,51 +222,6 @@ export function OverlayNav() {
               Warspy
             </span>
           </Link>
-
-          <button
-            className="desktop-only"
-            onClick={copyContractAddress}
-            title={`${WARSPY_TICKER} CA: ${WARSPY_CA}`}
-            style={{
-              background: "rgba(10,14,20,0.62)",
-              border: "1px solid rgba(45,63,84,0.75)",
-              borderRadius: "999px",
-              color: "#94a3b8",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-              height: "28px",
-              padding: "0 8px",
-              maxWidth: isCompactDesktop ? "148px" : "220px",
-              minWidth: 0,
-              flexShrink: 1,
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "9px",
-                letterSpacing: "0.08em",
-                color: "#6b7a8d",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {WARSPY_TICKER} CA:
-            </span>
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "9px",
-                color: "#cbd5e1",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {desktopCaLabel}
-            </span>
-          </button>
 
           <a
             className="desktop-only"
@@ -568,46 +488,6 @@ export function OverlayNav() {
                   borderBottom: "1px solid rgba(30,42,56,0.5)",
                 }}
               >
-                <button
-                  onClick={copyContractAddress}
-                  title={`${WARSPY_TICKER} CA: ${WARSPY_CA}`}
-                  style={{
-                    height: "36px",
-                    borderRadius: "999px",
-                    border: "1px solid rgba(45,63,84,0.8)",
-                    background: "rgba(10,14,20,0.65)",
-                    color: "#cbd5e1",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: "8px",
-                    padding: "0 12px",
-                    minWidth: 0,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "9px",
-                      color: "#6b7a8d",
-                      letterSpacing: "0.08em",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {WARSPY_TICKER} CA:
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "10px",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {truncateMiddle(WARSPY_CA, 6, 4)}
-                  </span>
-                </button>
                 <a
                   href={WARSPY_X_COMMUNITY_URL}
                   target="_blank"
@@ -679,33 +559,6 @@ export function OverlayNav() {
               ))}
             </motion.nav>
           </>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {copied && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.14 }}
-            style={{
-              position: "fixed",
-              top: "54px",
-              right: "12px",
-              zIndex: 240,
-              background: "rgba(10,14,20,0.95)",
-              border: "1px solid rgba(51,255,102,0.35)",
-              borderRadius: "999px",
-              padding: "4px 10px",
-              fontFamily: "var(--font-mono)",
-              fontSize: "9px",
-              letterSpacing: "0.06em",
-              color: "#9ae6b4",
-            }}
-          >
-            Copied
-          </motion.div>
         )}
       </AnimatePresence>
     </>
