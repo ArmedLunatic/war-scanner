@@ -167,8 +167,13 @@ export function OverlayNav() {
   const { toggle, isOpen } = usePanels();
   const [menuOpen, setMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isCompactDesktop, setIsCompactDesktop] = useState(false);
   const copyTimerRef = useRef<number | null>(null);
-  const desktopCaLabel = truncateMiddle(WARSPY_CA, 7, 6);
+  const desktopCaLabel = truncateMiddle(
+    WARSPY_CA,
+    isCompactDesktop ? 5 : 7,
+    isCompactDesktop ? 4 : 6
+  );
 
   useEffect(() => {
     return () => {
@@ -176,6 +181,13 @@ export function OverlayNav() {
         window.clearTimeout(copyTimerRef.current);
       }
     };
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => setIsCompactDesktop(window.innerWidth < 1500);
+    onResize();
+    window.addEventListener("resize", onResize, { passive: true });
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   const copyContractAddress = async () => {
@@ -217,7 +229,7 @@ export function OverlayNav() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "6px",
+            gap: isCompactDesktop ? "4px" : "6px",
             minWidth: 0,
           }}
         >
@@ -261,7 +273,7 @@ export function OverlayNav() {
               gap: "5px",
               height: "28px",
               padding: "0 8px",
-              maxWidth: "220px",
+              maxWidth: isCompactDesktop ? "148px" : "220px",
               minWidth: 0,
               flexShrink: 1,
             }}
@@ -298,13 +310,13 @@ export function OverlayNav() {
             rel="noopener noreferrer"
             style={{
               fontFamily: "var(--font-mono)",
-              fontSize: "9px",
+              fontSize: isCompactDesktop ? "8px" : "9px",
               letterSpacing: "0.08em",
               color: "#94a3b8",
               border: "1px solid rgba(45,63,84,0.85)",
               borderRadius: "999px",
-              padding: "5px 10px",
-              height: "28px",
+              padding: isCompactDesktop ? "4px 8px" : "5px 10px",
+              height: isCompactDesktop ? "26px" : "28px",
               display: "inline-flex",
               alignItems: "center",
               background: "rgba(10,14,20,0.45)",
@@ -344,7 +356,7 @@ export function OverlayNav() {
           className="desktop-only"
           style={{
             display: "flex",
-            gap: "1.1rem",
+            gap: isCompactDesktop ? "0.65rem" : "1.1rem",
             alignItems: "center",
             justifyContent: "center",
             minWidth: 0,
@@ -358,9 +370,9 @@ export function OverlayNav() {
               href={link.href}
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "10px",
+                fontSize: isCompactDesktop ? "9px" : "10px",
                 fontWeight: link.accent ? 700 : 500,
-                letterSpacing: "0.1em",
+                letterSpacing: isCompactDesktop ? "0.08em" : "0.1em",
                 textTransform: "uppercase",
                 color: link.accent ? "var(--accent-red)" : "var(--text-muted)",
                 textDecoration: "none",
@@ -384,7 +396,7 @@ export function OverlayNav() {
 
         {/* Right: THREATCON + panel toggles + hamburger */}
         <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
-          <ThreatconMeter />
+          {!isCompactDesktop && <ThreatconMeter />}
           {/* Panel toggles — always visible */}
           {PANEL_TOGGLES.map((pt) => {
             const active = isOpen(pt.id);
@@ -416,44 +428,48 @@ export function OverlayNav() {
                 }}
               >
                 <span>{pt.icon}</span>
-                <span
-                  className="desktop-only"
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "8px",
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    color: active ? "#60a5fa" : "#6b7a8d",
-                  }}
-                >
-                  {pt.label}
-                </span>
+                {!isCompactDesktop && (
+                  <span
+                    className="desktop-only"
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "8px",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      color: active ? "#60a5fa" : "#6b7a8d",
+                    }}
+                  >
+                    {pt.label}
+                  </span>
+                )}
               </button>
             );
           })}
 
           {/* CRT mode toggle — desktop only */}
-          <CrtToggle />
+          {!isCompactDesktop && <CrtToggle />}
 
           {/* ⌘K hint — desktop only */}
-          <button
-            className="desktop-only"
-            onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }))}
-            title="Command Palette"
-            style={{
-              background: "rgba(30,42,56,0.3)",
-              border: "1px solid rgba(30,42,56,0.7)",
-              borderRadius: "3px",
-              cursor: "pointer",
-              padding: "4px 8px",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              minHeight: "36px",
-            }}
-          >
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#3d4f63", letterSpacing: "0.08em" }}>⌘K</span>
-          </button>
+          {!isCompactDesktop && (
+            <button
+              className="desktop-only"
+              onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }))}
+              title="Command Palette"
+              style={{
+                background: "rgba(30,42,56,0.3)",
+                border: "1px solid rgba(30,42,56,0.7)",
+                borderRadius: "3px",
+                cursor: "pointer",
+                padding: "4px 8px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                minHeight: "36px",
+              }}
+            >
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#3d4f63", letterSpacing: "0.08em" }}>⌘K</span>
+            </button>
+          )}
 
           {/* Mobile hamburger */}
           <button
