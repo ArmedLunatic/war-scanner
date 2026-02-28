@@ -1,9 +1,19 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePanels } from "@/lib/context/PanelContext";
 import type { PanelId } from "@/lib/context/PanelContext";
+import {
+  WARSPY_CA,
+  WARSPY_TICKER,
+  WARSPY_X_COMMUNITY_URL,
+} from "@/config";
+
+function truncateMiddle(value: string, start: number, end: number) {
+  if (value.length <= start + end + 1) return value;
+  return `${value.slice(0, start)}...${value.slice(-end)}`;
+}
 
 // ─── THREATCON Meter ─────────────────────────────────────────────────────────
 const THREATCON_LABELS = ["", "ALPHA", "BRAVO", "CHARLIE", "DELTA", "ECHO"];
@@ -154,6 +164,29 @@ const NAV_LINKS = [
 export function OverlayNav() {
   const { toggle, isOpen } = usePanels();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) {
+        window.clearTimeout(copyTimerRef.current);
+      }
+    };
+  }, []);
+
+  const copyContractAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(WARSPY_CA);
+      setCopied(true);
+      if (copyTimerRef.current) {
+        window.clearTimeout(copyTimerRef.current);
+      }
+      copyTimerRef.current = window.setTimeout(() => setCopied(false), 1300);
+    } catch {
+      // noop
+    }
+  };
 
   return (
     <>
@@ -175,32 +208,107 @@ export function OverlayNav() {
           WebkitBackdropFilter: "blur(10px)",
         }}
       >
-        {/* Logo */}
-        <Link
-          href="/"
-          onClick={() => setMenuOpen(false)}
+        {/* Logo + CA */}
+        <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: "8px",
-            textDecoration: "none",
             flexShrink: 0,
           }}
         >
-          <span className="live-dot" />
-          <span
+          <Link
+            href="/"
+            onClick={() => setMenuOpen(false)}
             style={{
-              fontFamily: "var(--font-mono)",
-              fontWeight: 700,
-              fontSize: "12px",
-              letterSpacing: "0.2em",
-              color: "#e2e8f0",
-              textTransform: "uppercase",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              textDecoration: "none",
             }}
           >
-            Warspy
-          </span>
-        </Link>
+            <span className="live-dot" />
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontWeight: 700,
+                fontSize: "12px",
+                letterSpacing: "0.2em",
+                color: "#e2e8f0",
+                textTransform: "uppercase",
+              }}
+            >
+              Warspy
+            </span>
+          </Link>
+
+          <button
+            className="desktop-only"
+            onClick={copyContractAddress}
+            title={`${WARSPY_TICKER} CA: ${WARSPY_CA}`}
+            style={{
+              background: "rgba(10,14,20,0.62)",
+              border: "1px solid rgba(45,63,84,0.75)",
+              borderRadius: "999px",
+              color: "#94a3b8",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              height: "28px",
+              padding: "0 10px",
+              maxWidth: "min(460px, 34vw)",
+              minWidth: 0,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "9px",
+                letterSpacing: "0.08em",
+                color: "#6b7a8d",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {WARSPY_TICKER} CA:
+            </span>
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "9px",
+                color: "#cbd5e1",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {WARSPY_CA}
+            </span>
+          </button>
+
+          <a
+            className="desktop-only"
+            href={WARSPY_X_COMMUNITY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              letterSpacing: "0.08em",
+              color: "#94a3b8",
+              border: "1px solid rgba(45,63,84,0.85)",
+              borderRadius: "999px",
+              padding: "5px 10px",
+              height: "28px",
+              display: "inline-flex",
+              alignItems: "center",
+              background: "rgba(10,14,20,0.45)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Join 𝕏 Community
+          </a>
+        </div>
 
         {/* Desktop centered nav */}
         <nav
@@ -405,6 +513,78 @@ export function OverlayNav() {
               transition={{ duration: 0.18, ease: "easeOut" }}
               className="mobile-menu-drawer mobile-only"
             >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
+                  padding: "12px 20px",
+                  borderBottom: "1px solid rgba(30,42,56,0.5)",
+                }}
+              >
+                <button
+                  onClick={copyContractAddress}
+                  title={`${WARSPY_TICKER} CA: ${WARSPY_CA}`}
+                  style={{
+                    height: "36px",
+                    borderRadius: "999px",
+                    border: "1px solid rgba(45,63,84,0.8)",
+                    background: "rgba(10,14,20,0.65)",
+                    color: "#cbd5e1",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "8px",
+                    padding: "0 12px",
+                    minWidth: 0,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "9px",
+                      color: "#6b7a8d",
+                      letterSpacing: "0.08em",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {WARSPY_TICKER} CA:
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "10px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {truncateMiddle(WARSPY_CA, 6, 4)}
+                  </span>
+                </button>
+                <a
+                  href={WARSPY_X_COMMUNITY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    height: "36px",
+                    borderRadius: "999px",
+                    border: "1px solid rgba(45,63,84,0.8)",
+                    background: "rgba(10,14,20,0.45)",
+                    color: "#94a3b8",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "10px",
+                    letterSpacing: "0.08em",
+                  }}
+                >
+                  Join 𝕏 Community
+                </a>
+              </div>
+
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.href}
@@ -432,6 +612,33 @@ export function OverlayNav() {
               ))}
             </motion.nav>
           </>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {copied && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.14 }}
+            style={{
+              position: "fixed",
+              top: "54px",
+              right: "12px",
+              zIndex: 240,
+              background: "rgba(10,14,20,0.95)",
+              border: "1px solid rgba(51,255,102,0.35)",
+              borderRadius: "999px",
+              padding: "4px 10px",
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              letterSpacing: "0.06em",
+              color: "#9ae6b4",
+            }}
+          >
+            Copied
+          </motion.div>
         )}
       </AnimatePresence>
     </>
