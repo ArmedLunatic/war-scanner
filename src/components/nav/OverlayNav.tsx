@@ -6,6 +6,8 @@ import { usePanels } from "@/lib/context/PanelContext";
 import type { PanelId } from "@/lib/context/PanelContext";
 import {
   WARSPY_CA,
+  WARSPY_DEV_X_HANDLE,
+  WARSPY_DEV_X_URL,
   WARSPY_TICKER,
   WARSPY_X_COMMUNITY_URL,
 } from "@/config";
@@ -308,6 +310,29 @@ export function OverlayNav() {
           >
             Join 𝕏 Community
           </a>
+
+          <a
+            className="desktop-only"
+            href={WARSPY_DEV_X_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              letterSpacing: "0.08em",
+              color: "#6b7a8d",
+              border: "1px solid rgba(45,63,84,0.6)",
+              borderRadius: "999px",
+              padding: "5px 10px",
+              height: "28px",
+              display: "inline-flex",
+              alignItems: "center",
+              background: "rgba(10,14,20,0.28)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Dev X: {WARSPY_DEV_X_HANDLE}
+          </a>
         </div>
 
         {/* Desktop centered nav */}
@@ -582,6 +607,27 @@ export function OverlayNav() {
                   }}
                 >
                   Join 𝕏 Community
+                </a>
+                <a
+                  href={WARSPY_DEV_X_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    height: "36px",
+                    borderRadius: "999px",
+                    border: "1px solid rgba(45,63,84,0.7)",
+                    background: "rgba(10,14,20,0.35)",
+                    color: "#6b7a8d",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "10px",
+                    letterSpacing: "0.08em",
+                  }}
+                >
+                  Dev X: {WARSPY_DEV_X_HANDLE}
                 </a>
               </div>
 
