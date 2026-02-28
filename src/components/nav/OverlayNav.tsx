@@ -47,6 +47,7 @@ function ThreatconMeter() {
     <Tooltip text="Threat Condition — composite score based on event frequency and severity over 7 days">
       <div
         className="desktop-only"
+        data-tour="step-threatcon"
         style={{
           display: "flex",
           alignItems: "center",
@@ -334,53 +335,55 @@ export function OverlayNav() {
         <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
           {!isCompactDesktop && <ThreatconMeter />}
           {/* Panel toggles — always visible */}
-          {PANEL_TOGGLES.map((pt) => {
-            const active = isOpen(pt.id);
-            return (
-              <button
-                key={pt.id}
-                onClick={() => toggle(pt.id)}
-                title={`${pt.label} — ${pt.subtitle}`}
-                aria-label={`Toggle ${pt.label} panel`}
-                style={{
-                  background: active
-                    ? "rgba(96,165,250,0.15)"
-                    : "rgba(30,42,56,0.4)",
-                  border: `1px solid ${
-                    active ? "rgba(96,165,250,0.4)" : "rgba(30,42,56,0.8)"
-                  }`,
-                  borderRadius: "3px",
-                  cursor: "pointer",
-                  padding: "4px 7px",
-                  fontSize: "14px",
-                  lineHeight: 1,
-                  minWidth: "36px",
-                  minHeight: "36px",
-                  transition: "all 0.12s",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "4px",
-                }}
-              >
-                <span>{pt.icon}</span>
-                {!isCompactDesktop && (
-                  <span
-                    className="desktop-only"
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "8px",
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
-                      color: active ? "#60a5fa" : "#6b7a8d",
-                    }}
-                  >
-                    {pt.label}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+          <div data-tour="step-panels" style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+            {PANEL_TOGGLES.map((pt) => {
+              const active = isOpen(pt.id);
+              return (
+                <button
+                  key={pt.id}
+                  onClick={() => toggle(pt.id)}
+                  title={`${pt.label} — ${pt.subtitle}`}
+                  aria-label={`Toggle ${pt.label} panel`}
+                  style={{
+                    background: active
+                      ? "rgba(96,165,250,0.15)"
+                      : "rgba(30,42,56,0.4)",
+                    border: `1px solid ${
+                      active ? "rgba(96,165,250,0.4)" : "rgba(30,42,56,0.8)"
+                    }`,
+                    borderRadius: "3px",
+                    cursor: "pointer",
+                    padding: "4px 7px",
+                    fontSize: "14px",
+                    lineHeight: 1,
+                    minWidth: "36px",
+                    minHeight: "36px",
+                    transition: "all 0.12s",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <span>{pt.icon}</span>
+                  {!isCompactDesktop && (
+                    <span
+                      className="desktop-only"
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "8px",
+                        letterSpacing: "0.08em",
+                        textTransform: "uppercase",
+                        color: active ? "#60a5fa" : "#6b7a8d",
+                      }}
+                    >
+                      {pt.label}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
 
           {/* CRT mode toggle — desktop only */}
           {!isCompactDesktop && <CrtToggle />}

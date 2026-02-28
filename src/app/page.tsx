@@ -10,6 +10,7 @@ import { EscalationPanel } from "@/components/panels/EscalationPanel";
 import { StatusBar } from "@/components/nav/StatusBar";
 import { usePanels } from "@/lib/context/PanelContext";
 import type { GlobeMarker } from "@/components/globe/globeData";
+import WelcomeTour from "@/components/WelcomeTour";
 
 const GlobeWrapper = dynamic(
   () => import("@/components/globe/GlobeWrapper"),
@@ -88,7 +89,7 @@ export default function GlobePage() {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
       {/* Full-screen globe */}
-      <div style={{ position: "fixed", inset: 0, zIndex: 0, background: "#030508" }}>
+      <div data-tour="step-globe" style={{ position: "fixed", inset: 0, zIndex: 0, background: "#030508" }}>
         <GlobeWrapper onMarkerClick={(m) => setSelectedMarker(m)} />
       </div>
 
@@ -214,6 +215,8 @@ export default function GlobePage() {
           </button>
         </div>
       )}
+
+      <WelcomeTour />
     </>
   );
 }
