@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { runAllProviders } from "@/lib/ingest";
 import { normalizeNewItems } from "@/lib/pipeline/normalize";
@@ -7,7 +7,7 @@ import { scoreAllClusters } from "@/lib/pipeline/score";
 import { summarizeAllClusters } from "@/lib/pipeline/summarize";
 import { publishFeedCache } from "@/lib/pipeline/publish";
 
-// Vercel: allow up to 5 min for the pipeline on pro/enterprise plans
+// Allow up to 5 min for the pipeline
 export const maxDuration = 300;
 
 function verifyToken(expected: string, actual: string): boolean {
@@ -75,7 +75,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 }
 
-// Support Vercel Cron (GET with no auth header, protected by cron secret)
+// Called by cron-job.org every 15 minutes.
+// Configure the job with: GET <your-domain>/api/admin/run-ingest
+// Header: Authorization: Bearer <CRON_SECRET>
+// Returns 202 immediately; the pipeline runs in the background via after().
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const cronSecret = process.env.CRON_SECRET ?? "";
   const authHeader = req.headers.get("Authorization") ?? "";
@@ -85,13 +88,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  console.log("[ingest] Cron-triggered pipeline run...");
+  console.log("[ingest] Cron-triggered pipeline run (background)...");
 
-  try {
-    const stats = await runPipeline();
-    return NextResponse.json({ ok: true, stats });
-  } catch (err) {
-    console.error("[ingest] Pipeline error:", err);
-    return NextResponse.json({ error: "Pipeline error" }, { status: 500 });
-  }
+  after(async () => {
+    try {
+      const stats = await runPipeline();
+      console.log("[ingest] Pipeline complete:", stats);
+    } catch (err) {
+      console.error("[ingest] Pipeline error:", err);
+    }
+  });
+
+  return NextResponse.json({ ok: true, message: "Pipeline triggered" }, { status: 202 });
 }
