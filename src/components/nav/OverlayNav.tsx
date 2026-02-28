@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePanels } from "@/lib/context/PanelContext";
 import type { PanelId } from "@/lib/context/PanelContext";
@@ -137,26 +137,27 @@ interface PanelToggle {
   id: PanelId;
   icon: string;
   label: string;
+  subtitle: string;
 }
 
 const PANEL_TOGGLES: PanelToggle[] = [
-  { id: "live", icon: "📡", label: "Events" },
-  { id: "social", icon: "💬", label: "Social" },
-  { id: "brief", icon: "📋", label: "Brief" },
-  { id: "escalation", icon: "📈", label: "Escalation" },
+  { id: "live", icon: "📡", label: "Live Events", subtitle: "Real-time conflict updates" },
+  { id: "social", icon: "💬", label: "Social Feed", subtitle: "News, Reddit, Telegram" },
+  { id: "brief", icon: "📋", label: "Daily Brief", subtitle: "Top events last 12 hours" },
+  { id: "escalation", icon: "📈", label: "Threat Index", subtitle: "30-day escalation trend" },
 ];
 
 const NAV_LINKS = [
-  { href: "/", label: "Globe" },
-  { href: "/focus", label: "FOCUS: Israel–Iran", accent: true },
-  { href: "/feed", label: "Feed" },
-  { href: "/nuclear", label: "Nuclear" },
-  { href: "/strikes", label: "Strike Replay", accent: false },
-  { href: "/actors", label: "Actors" },
-  { href: "/context", label: "Context" },
-  { href: "/brief", label: "Brief" },
-  { href: "/heatmap", label: "Heatmap" },
-  { href: "/methodology", label: "Methodology" },
+  { href: "/", label: "Globe", group: "primary" },
+  { href: "/feed", label: "Feed", group: "primary" },
+  { href: "/brief", label: "Brief", group: "primary" },
+  { href: "/focus", label: "FOCUS: Israel–Iran", accent: true, group: "analysis" },
+  { href: "/nuclear", label: "Nuclear", group: "analysis" },
+  { href: "/strikes", label: "Strike Replay", group: "analysis" },
+  { href: "/actors", label: "Actors", group: "analysis" },
+  { href: "/context", label: "Context", group: "reference" },
+  { href: "/heatmap", label: "Heatmap", group: "reference" },
+  { href: "/methodology", label: "Methodology", group: "reference" },
 ];
 
 export function OverlayNav() {
@@ -287,34 +288,46 @@ export function OverlayNav() {
             padding: "0 6px",
           }}
         >
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: isCompactDesktop ? "9px" : "10px",
-                fontWeight: link.accent ? 700 : 500,
-                letterSpacing: isCompactDesktop ? "0.08em" : "0.1em",
-                textTransform: "uppercase",
-                color: link.accent ? "var(--accent-red)" : "var(--text-muted)",
-                textDecoration: "none",
-                whiteSpace: "nowrap",
-                transition: "color 0.12s",
-              }}
-              onMouseEnter={(e) => {
-                if (!link.accent)
-                  (e.currentTarget as HTMLElement).style.color = "#e2e8f0";
-              }}
-              onMouseLeave={(e) => {
-                if (!link.accent)
-                  (e.currentTarget as HTMLElement).style.color =
-                    "var(--text-muted)";
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link, i) => {
+            const prevGroup = i > 0 ? NAV_LINKS[i - 1].group : link.group;
+            const showDivider = i > 0 && link.group !== prevGroup;
+            return (
+              <Fragment key={link.href}>
+                {showDivider && (
+                  <span style={{
+                    width: "1px",
+                    height: "14px",
+                    background: "rgba(45,63,84,0.5)",
+                    flexShrink: 0,
+                  }} />
+                )}
+                <Link
+                  href={link.href}
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: isCompactDesktop ? "9px" : "10px",
+                    fontWeight: link.accent ? 700 : 500,
+                    letterSpacing: isCompactDesktop ? "0.08em" : "0.1em",
+                    textTransform: "uppercase",
+                    color: link.accent ? "var(--accent-red)" : "var(--text-muted)",
+                    textDecoration: "none",
+                    whiteSpace: "nowrap",
+                    transition: "color 0.12s",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!link.accent)
+                      (e.currentTarget as HTMLElement).style.color = "#e2e8f0";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!link.accent)
+                      (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
+                  }}
+                >
+                  {link.label}
+                </Link>
+              </Fragment>
+            );
+          })}
         </nav>
 
         {/* Right: THREATCON + panel toggles + hamburger */}
@@ -327,7 +340,7 @@ export function OverlayNav() {
               <button
                 key={pt.id}
                 onClick={() => toggle(pt.id)}
-                title={pt.label}
+                title={`${pt.label} — ${pt.subtitle}`}
                 aria-label={`Toggle ${pt.label} panel`}
                 style={{
                   background: active
@@ -372,27 +385,51 @@ export function OverlayNav() {
           {/* CRT mode toggle — desktop only */}
           {!isCompactDesktop && <CrtToggle />}
 
-          {/* ⌘K hint — desktop only */}
-          {!isCompactDesktop && (
-            <button
-              className="desktop-only"
-              onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }))}
-              title="Command Palette"
-              style={{
-                background: "rgba(30,42,56,0.3)",
-                border: "1px solid rgba(30,42,56,0.7)",
-                borderRadius: "3px",
-                cursor: "pointer",
-                padding: "4px 8px",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                minHeight: "36px",
-              }}
-            >
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#3d4f63", letterSpacing: "0.08em" }}>⌘K</span>
-            </button>
-          )}
+          {/* Search pill — desktop only */}
+          <button
+            className="desktop-only"
+            data-tour="step-search"
+            onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }))}
+            title="Search (Ctrl+K)"
+            style={{
+              background: "rgba(10,14,20,0.6)",
+              border: "1px solid rgba(45,63,84,0.7)",
+              borderRadius: "999px",
+              cursor: "pointer",
+              padding: "0 12px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              height: "32px",
+              minWidth: isCompactDesktop ? "140px" : "200px",
+              transition: "border-color 0.15s",
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "rgba(96,165,250,0.4)")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "rgba(45,63,84,0.7)")}
+          >
+            <span style={{ fontSize: "12px", color: "#3d4f63" }}>🔍</span>
+            <span style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "10px",
+              color: "#3d4f63",
+              letterSpacing: "0.04em",
+              flex: 1,
+              textAlign: "left",
+            }}>
+              Search intel...
+            </span>
+            <span style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              color: "#2d3f54",
+              background: "rgba(30,42,56,0.4)",
+              borderRadius: "3px",
+              padding: "2px 5px",
+              letterSpacing: "0.06em",
+            }}>
+              ⌘K
+            </span>
+          </button>
 
           {/* Mobile hamburger */}
           <button
@@ -482,6 +519,35 @@ export function OverlayNav() {
               transition={{ duration: 0.18, ease: "easeOut" }}
               className="mobile-menu-drawer mobile-only"
             >
+              <div style={{ padding: "12px 20px 4px", borderBottom: "1px solid rgba(30,42,56,0.5)" }}>
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setTimeout(() => {
+                      window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
+                    }, 200);
+                  }}
+                  style={{
+                    width: "100%",
+                    height: "40px",
+                    borderRadius: "999px",
+                    border: "1px solid rgba(96,165,250,0.2)",
+                    background: "rgba(96,165,250,0.06)",
+                    color: "#94a3b8",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "10px",
+                    letterSpacing: "0.08em",
+                    cursor: "pointer",
+                  }}
+                >
+                  🔍 Search intel, locations...
+                </button>
+              </div>
+
               <div
                 style={{
                   display: "flex",
@@ -535,30 +601,103 @@ export function OverlayNav() {
                 </a>
               </div>
 
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "0 20px",
-                    height: "52px",
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "2px",
+                  padding: "8px 20px",
+                  borderBottom: "1px solid rgba(30,42,56,0.5)",
+                }}
+              >
+                <div style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "8px",
+                  letterSpacing: "0.16em",
+                  color: "#2d3f54",
+                  textTransform: "uppercase",
+                  padding: "4px 0",
+                }}>
+                  Panels
+                </div>
+                {PANEL_TOGGLES.map((pt) => (
+                  <button
+                    key={pt.id}
+                    onClick={() => { toggle(pt.id); setMenuOpen(false); }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "10px 0",
+                      background: "none",
+                      border: "none",
+                      borderBottom: "1px solid rgba(30,42,56,0.3)",
+                      cursor: "pointer",
+                      width: "100%",
+                    }}
+                  >
+                    <span style={{ fontSize: "14px" }}>{pt.icon}</span>
+                    <div style={{ textAlign: "left" }}>
+                      <div style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "10px",
+                        letterSpacing: "0.08em",
+                        color: isOpen(pt.id) ? "#60a5fa" : "#94a3b8",
+                        textTransform: "uppercase",
+                      }}>
+                        {pt.label}
+                      </div>
+                      <div style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "8px",
+                        color: "#3d4f63",
+                        letterSpacing: "0.04em",
+                        marginTop: "1px",
+                      }}>
+                        {pt.subtitle}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Nav links grouped */}
+              {(["primary", "analysis", "reference"] as const).map((group) => (
+                <div key={group}>
+                  <div style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: "11px",
-                    fontWeight: link.accent ? 700 : 500,
-                    letterSpacing: "0.1em",
+                    fontSize: "8px",
+                    letterSpacing: "0.16em",
+                    color: "#2d3f54",
                     textTransform: "uppercase",
-                    color: link.accent
-                      ? "var(--accent-red)"
-                      : "var(--text-secondary)",
-                    textDecoration: "none",
-                    borderBottom: "1px solid rgba(30,42,56,0.5)",
-                  }}
-                >
-                  {link.label}
-                </Link>
+                    padding: "12px 20px 4px",
+                  }}>
+                    {group}
+                  </div>
+                  {NAV_LINKS.filter((l) => l.group === group).map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMenuOpen(false)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "0 20px",
+                        height: "48px",
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "11px",
+                        fontWeight: link.accent ? 700 : 500,
+                        letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                        color: link.accent ? "var(--accent-red)" : "var(--text-secondary)",
+                        textDecoration: "none",
+                        borderBottom: "1px solid rgba(30,42,56,0.3)",
+                      }}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
               ))}
             </motion.nav>
           </>
