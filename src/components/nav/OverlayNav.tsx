@@ -168,6 +168,7 @@ export function OverlayNav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const copyTimerRef = useRef<number | null>(null);
+  const desktopCaLabel = truncateMiddle(WARSPY_CA, 7, 6);
 
   useEffect(() => {
     return () => {
@@ -200,9 +201,10 @@ export function OverlayNav() {
           right: 0,
           height: "48px",
           zIndex: 200,
-          display: "flex",
+          display: "grid",
+          gridTemplateColumns: "minmax(0, auto) minmax(0, 1fr) minmax(0, auto)",
           alignItems: "center",
-          justifyContent: "space-between",
+          gap: "12px",
           padding: "0 1rem",
           background: "rgba(3,5,8,0.88)",
           borderBottom: "1px solid rgba(96,165,250,0.1)",
@@ -215,8 +217,8 @@ export function OverlayNav() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "8px",
-            flexShrink: 0,
+            gap: "6px",
+            minWidth: 0,
           }}
         >
           <Link
@@ -258,9 +260,10 @@ export function OverlayNav() {
               alignItems: "center",
               gap: "5px",
               height: "28px",
-              padding: "0 10px",
-              maxWidth: "min(460px, 34vw)",
+              padding: "0 8px",
+              maxWidth: "220px",
               minWidth: 0,
+              flexShrink: 1,
             }}
           >
             <span
@@ -284,7 +287,7 @@ export function OverlayNav() {
                 textOverflow: "ellipsis",
               }}
             >
-              {WARSPY_CA}
+              {desktopCaLabel}
             </span>
           </button>
 
@@ -341,11 +344,12 @@ export function OverlayNav() {
           className="desktop-only"
           style={{
             display: "flex",
-            gap: "1.5rem",
+            gap: "1.1rem",
             alignItems: "center",
-            position: "absolute",
-            left: "50%",
-            transform: "translateX(-50%)",
+            justifyContent: "center",
+            minWidth: 0,
+            overflow: "hidden",
+            padding: "0 6px",
           }}
         >
           {NAV_LINKS.map((link) => (
