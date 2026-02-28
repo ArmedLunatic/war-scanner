@@ -6,6 +6,7 @@ import { SocialFeedPanel } from "@/components/panels/SocialFeedPanel";
 import { ContextPanel } from "@/components/panels/ContextPanel";
 import { TimelinePanel } from "@/components/panels/TimelinePanel";
 import { BriefPanel } from "@/components/panels/BriefPanel";
+import { EscalationPanel } from "@/components/panels/EscalationPanel";
 import { StatusBar } from "@/components/nav/StatusBar";
 import { usePanels } from "@/lib/context/PanelContext";
 import type { GlobeMarker } from "@/components/globe/globeData";
@@ -114,6 +115,7 @@ export default function GlobePage() {
         <LiveFeedPanel />
         <SocialFeedPanel />
         <BriefPanel />
+        <EscalationPanel />
       </div>
 
       {/* ── Left panel (desktop only) ── */}
@@ -135,6 +137,7 @@ export default function GlobePage() {
         <SocialFeedPanel />
         <BriefPanel />
         <ContextPanel />
+        <EscalationPanel />
       </div>
 
       {/* ── Status bar (desktop only) ── */}

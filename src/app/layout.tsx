@@ -17,10 +17,30 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://warspy.vercel.app";
+
 export const metadata: Metadata = {
   title: "Warspy — Israel–Iran Conflict Monitor",
   description:
     "Real-time Israel–Iran conflict theater: interactive 3D globe, live event feed, social stream, and historical context. Powered by GDELT, ReliefWeb, RSS, and Reddit.",
+  openGraph: {
+    title: "Warspy — Conflict Intelligence",
+    description: "Real-time Israel–Iran conflict monitor · 3D globe · Live events · Social feed",
+    images: [
+      {
+        url: `${appUrl}/api/og?title=Warspy+%E2%80%94+Conflict+Intelligence&sub=Real-time+Israel%E2%80%93Iran+conflict+monitor`,
+        width: 1200,
+        height: 630,
+        alt: "Warspy conflict monitor",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Warspy — Conflict Intelligence",
+    description: "Real-time Israel–Iran conflict monitor",
+    images: [`${appUrl}/api/og?title=Warspy+%E2%80%94+Conflict+Intelligence`],
+  },
 };
 
 export const viewport: Viewport = {

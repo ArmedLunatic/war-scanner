@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { CategoryTag } from "@/components/CategoryTag";
 import { SourcesList } from "@/components/SourcesList";
@@ -7,6 +8,35 @@ import type { ClusterDetail } from "@/lib/types";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const cluster = await getCluster(id);
+  if (!cluster) return {};
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://warspy.vercel.app";
+  const ogParams = new URLSearchParams({
+    title: cluster.headline,
+    sub: cluster.summary_know[0] ?? "Warspy conflict event",
+    category: cluster.category,
+    confidence: cluster.confidence,
+    score: String(Math.round(cluster.score)),
+    country: cluster.country ?? "",
+  });
+  return {
+    title: `${cluster.headline} — Warspy`,
+    description: cluster.summary_know[0] ?? cluster.headline,
+    openGraph: {
+      title: cluster.headline,
+      description: cluster.summary_know[0] ?? cluster.headline,
+      images: [{ url: `${appUrl}/api/og?${ogParams}`, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: cluster.headline,
+      images: [`${appUrl}/api/og?${ogParams}`],
+    },
+  };
 }
 
 async function getCluster(id: string): Promise<ClusterDetail | null> {

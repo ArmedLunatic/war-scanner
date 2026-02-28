@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import type { GlobeMarker } from "./globeData";
+import type { GlobeMarker, GlobeArc } from "./globeData";
 
 const ConflictGlobe = dynamic(() => import("./ConflictGlobe"), {
   ssr: false,
@@ -34,6 +34,8 @@ const ConflictGlobe = dynamic(() => import("./ConflictGlobe"), {
 interface Props {
   initialPov?: { lat: number; lng: number; altitude: number };
   onMarkerClick?: (marker: GlobeMarker) => void;
+  customArcs?: GlobeArc[];
+  hideDefaultArcs?: boolean;
 }
 
 export default function GlobeWrapper(props: Props) {

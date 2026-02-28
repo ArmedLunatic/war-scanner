@@ -156,6 +156,36 @@ async function fetchReddit(): Promise<SocialPost[]> {
     .flatMap((r) => (r as PromiseFulfilledResult<SocialPost[]>).value);
 }
 
+// ─── D2. Telegram Channels via RSSHub ────────────────────────────────────────
+// Public Telegram channels exposed as RSS through rsshub.app (open-source, free)
+
+const TELEGRAM_CHANNELS = [
+  { channel: "israelwarroom",     tag: "ILWarRoom",  name: "Israel War Room"    },
+  { channel: "intelslava",        tag: "IntelSlava", name: "Intel Slava Z"      },
+  { channel: "MiddleEastSpectator", tag: "MESpect", name: "ME Spectator"        },
+  { channel: "OsintDefender",     tag: "OSINT",      name: "OSINT Defender"     },
+];
+
+async function fetchTelegramChannels(): Promise<SocialPost[]> {
+  const results = await Promise.allSettled(
+    TELEGRAM_CHANNELS.map(async (ch) => {
+      const url = `https://rsshub.app/telegram/channel/${ch.channel}`;
+      const res = await fetch(url, {
+        headers: { "User-Agent": "warspy/1.0" },
+        signal: AbortSignal.timeout(10000),
+      });
+      if (!res.ok) return [];
+      const xml = await res.text();
+      return parseRssItems(xml, ch.name, ch.tag)
+        .slice(0, 5)
+        .map((p) => ({ ...p, type: "rss" as const }));
+    })
+  );
+  return results
+    .filter((r) => r.status === "fulfilled")
+    .flatMap((r) => (r as PromiseFulfilledResult<SocialPost[]>).value);
+}
+
 // ─── E. NewsAPI (optional) ────────────────────────────────────────────────────
 
 async function fetchNewsApi(): Promise<SocialPost[]> {
@@ -223,15 +253,16 @@ export interface SocialFetchResult {
 }
 
 export async function fetchAllSocialSources(): Promise<SocialFetchResult> {
-  const [rss, google, reddit, newsapi, twitter] = await Promise.all([
+  const [rss, google, reddit, telegram, newsapi, twitter] = await Promise.all([
     fetchRssSources().catch(() => [] as SocialPost[]),
     fetchGoogleNews().catch(() => [] as SocialPost[]),
     fetchReddit().catch(() => [] as SocialPost[]),
+    fetchTelegramChannels().catch(() => [] as SocialPost[]),
     fetchNewsApi().catch(() => [] as SocialPost[]),
     fetchTwitter().catch(() => [] as SocialPost[]),
   ]);
 
-  const all = [...rss, ...google, ...reddit, ...newsapi, ...twitter];
+  const all = [...rss, ...google, ...reddit, ...telegram, ...newsapi, ...twitter];
 
   // Deduplicate by URL
   const seen = new Set<string>();

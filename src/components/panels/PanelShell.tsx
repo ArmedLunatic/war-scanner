@@ -18,7 +18,7 @@ function useIsMobile() {
 
 interface Props {
   id: PanelId;
-  title: string;
+  title: ReactNode;
   icon?: string;
   width?: number;
   maxHeight?: string;

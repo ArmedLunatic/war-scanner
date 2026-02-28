@@ -7,16 +7,21 @@ import {
   HIGHLIGHT_COUNTRY_IDS,
   HOME_POV,
   type GlobeMarker,
+  type GlobeArc,
 } from "./globeData";
 
 interface Props {
   initialPov?: { lat: number; lng: number; altitude: number };
   onMarkerClick?: (marker: GlobeMarker) => void;
+  customArcs?: GlobeArc[];
+  hideDefaultArcs?: boolean;
 }
 
 export default function ConflictGlobe({
   initialPov = HOME_POV,
   onMarkerClick,
+  customArcs,
+  hideDefaultArcs = false,
 }: Props) {
   const globeRef = useRef<any>(null);
   const [polygons, setPolygons] = useState<any[]>([]);
@@ -156,7 +161,7 @@ export default function ConflictGlobe({
         onPointClick={handleMarkerClick}
         pointsMerge={false}
         // Conflict arcs
-        arcsData={CONFLICT_ARCS}
+        arcsData={customArcs ?? (hideDefaultArcs ? [] : CONFLICT_ARCS)}
         arcStartLat="startLat"
         arcStartLng="startLng"
         arcEndLat="endLat"

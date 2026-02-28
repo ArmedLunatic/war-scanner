@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useState, useCallback } from "react";
 
-export type PanelId = "live" | "social" | "context" | "brief";
+export type PanelId = "live" | "social" | "context" | "brief" | "escalation";
 
 interface PanelContextValue {
   openPanels: Set<PanelId>;

@@ -4,6 +4,10 @@ import { PanelShell } from "./PanelShell";
 import type { FeedResponse, ClusterCard } from "@/lib/types";
 
 const REFRESH_MS = 3 * 60 * 1000;
+const REALTIME_AVAILABLE =
+  typeof process !== "undefined" &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 function severityColor(s: number) {
   if (s >= 5) return "#e03e3e";
@@ -30,6 +34,8 @@ export function LiveFeedPanel() {
   const [clusters, setClusters] = useState<ClusterCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastFetch, setLastFetch] = useState(0);
+  const [realtimeConnected, setRealtimeConnected] = useState(false);
+  const [newCount, setNewCount] = useState(0);
 
   const fetchFeed = useCallback(async () => {
     try {
@@ -52,14 +58,85 @@ export function LiveFeedPanel() {
     }
   }, []);
 
+  // Initial fetch + polling fallback
   useEffect(() => {
     fetchFeed();
     const id = setInterval(fetchFeed, REFRESH_MS);
     return () => clearInterval(id);
   }, [fetchFeed]);
 
+  // Supabase Realtime subscription
+  useEffect(() => {
+    if (!REALTIME_AVAILABLE) return;
+    let channel: ReturnType<import("@supabase/supabase-js").SupabaseClient["channel"]> | null = null;
+    import("@/lib/supabase")
+      .then(({ getBrowserClient }) => {
+        const supabase = getBrowserClient();
+        channel = supabase
+          .channel("clusters-realtime")
+          .on(
+            "postgres_changes" as any,
+            { event: "INSERT", schema: "public", table: "clusters" },
+            () => {
+              fetchFeed();
+              setNewCount((c) => c + 1);
+            }
+          )
+          .subscribe((status: string) => {
+            setRealtimeConnected(status === "SUBSCRIBED");
+          });
+      })
+      .catch(() => {});
+    return () => {
+      if (channel) {
+        import("@/lib/supabase").then(({ getBrowserClient }) => {
+          getBrowserClient().removeChannel(channel!);
+        }).catch(() => {});
+      }
+    };
+  }, [fetchFeed]);
+
+  const title = (
+    <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+      Live Events
+      {realtimeConnected && (
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "3px",
+            fontFamily: "var(--font-mono)",
+            fontSize: "7px",
+            letterSpacing: "0.1em",
+            color: "#22c55e",
+          }}
+        >
+          <span className="live-dot" style={{ width: "5px", height: "5px" }} />
+          REALTIME
+        </span>
+      )}
+      {newCount > 0 && (
+        <span
+          onClick={() => setNewCount(0)}
+          style={{
+            background: "#e03e3e",
+            color: "#fff",
+            fontFamily: "var(--font-mono)",
+            fontSize: "7px",
+            letterSpacing: "0.06em",
+            padding: "1px 5px",
+            borderRadius: "2px",
+            cursor: "pointer",
+          }}
+        >
+          {newCount} NEW
+        </span>
+      )}
+    </span>
+  );
+
   return (
-    <PanelShell id="live" title="Live Events" icon="📡">
+    <PanelShell id="live" title={title as any} icon="📡">
       {loading ? (
         <div
           style={{

@@ -322,3 +322,101 @@ body.body-globe-mode {
   overflow: hidden;
   height: 100vh;
 }
+
+/* ─── Classified / Redacted reveal effect ──────────────────────────────────── */
+.classified {
+  display: inline;
+  background: rgba(30, 42, 56, 0.95);
+  color: rgba(30, 42, 56, 0.95); /* text matches bg → invisible */
+  border-radius: 2px;
+  cursor: pointer;
+  padding: 1px 3px;
+  user-select: none;
+  border: 1px solid rgba(30, 42, 56, 0.6);
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  position: relative;
+}
+
+.classified::after {
+  content: " [CLASSIFIED]";
+  font-family: var(--font-mono);
+  font-size: 0.65em;
+  letter-spacing: 0.1em;
+  color: rgba(96, 165, 250, 0.4);
+  transition: opacity 0.3s;
+}
+
+.classified:hover {
+  background: rgba(96, 165, 250, 0.06);
+  color: var(--text-secondary);
+  border-color: rgba(96, 165, 250, 0.2);
+}
+
+.classified:hover::after {
+  opacity: 0;
+}
+
+/* ─── CRT Mode (green phosphor) ─────────────────────────────────────────────── */
+body.crt-mode {
+  --text-primary: #33ff66;
+  --text-secondary: #22cc44;
+  --text-muted: #15882e;
+  --text-dim: #0d5c1e;
+  --accent-blue: #33ff66;
+  --accent-red: #ff4433;
+  --accent-green: #33ff66;
+  --accent-amber: #ffcc00;
+  --border: #0d5c1e;
+  --border-glow: rgba(51, 255, 102, 0.2);
+  --bg: #000a00;
+  --bg-card: #001200;
+  --bg-panel: rgba(0, 14, 0, 0.9);
+  --bg-panel-header: rgba(0, 20, 0, 0.95);
+  filter: saturate(0.8);
+}
+
+/* CRT scanlines (stronger than normal) */
+body.crt-mode::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.12) 0px,
+    rgba(0, 0, 0, 0.12) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: multiply;
+}
+
+/* CRT text glow */
+body.crt-mode,
+body.crt-mode * {
+  text-shadow: 0 0 6px currentColor;
+}
+
+/* CRT screen flicker */
+body.crt-mode {
+  animation: crt-flicker 8s infinite;
+}
+
+@keyframes crt-flicker {
+  0%, 95%, 100% { opacity: 1; }
+  96% { opacity: 0.97; }
+  97% { opacity: 1; }
+  98% { opacity: 0.95; }
+  99% { opacity: 1; }
+}
+
+/* Vignette for CRT */
+body.crt-mode::after {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%);
+}

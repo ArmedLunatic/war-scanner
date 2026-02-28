@@ -36,6 +36,10 @@ function buildCommands(): Command[] {
     { id: "nav-feed", label: "Live Feed", sub: "All global conflict events", category: "navigate", icon: "📰", keywords: ["events", "news", "feed", "all"], action: ({ router }) => router.push("/feed") },
     { id: "nav-context", label: "Historical Context", sub: "1979 → 2024 background", category: "navigate", icon: "📜", keywords: ["history", "background", "why", "context"], action: ({ router }) => router.push("/context") },
     { id: "nav-brief", label: "Intelligence Brief", sub: "Top 10 last 12 hours", category: "navigate", icon: "📋", keywords: ["brief", "top", "ranked", "best"], action: ({ router }) => router.push("/brief") },
+    { id: "nav-nuclear", label: "Nuclear Status", sub: "Iran enrichment · breakout timeline", category: "navigate", icon: "☢️", color: "#f97316", keywords: ["nuclear", "iran", "enrichment", "uranium", "iaea", "bomb", "natanz", "centrifuge"], action: ({ router }) => router.push("/nuclear") },
+    { id: "nav-strikes", label: "Strike Replay", sub: "April 13 & Oct 1, 2024 barrages", category: "navigate", icon: "🚀", color: "#e03e3e", keywords: ["strike", "replay", "april", "october", "barrage", "missile", "drone", "attack", "ttp", "true promise"], action: ({ router }) => router.push("/strikes") },
+    { id: "nav-actors", label: "Conflict Actors", sub: "IDF, IRGC, Mossad, Hezbollah, Hamas...", category: "navigate", icon: "🎯", keywords: ["actors", "idf", "irgc", "mossad", "hezbollah", "hamas", "houthis", "pmf", "military", "profiles"], action: ({ router }) => router.push("/actors") },
+    { id: "nav-heatmap", label: "Activity Heatmap", sub: "90-day event density calendar", category: "navigate", icon: "🟥", keywords: ["heatmap", "calendar", "activity", "density", "history", "days", "grid"], action: ({ router }) => router.push("/heatmap") },
     { id: "nav-methodology", label: "Methodology", sub: "How data is sourced & scored", category: "navigate", icon: "⚙️", keywords: ["docs", "about", "how", "algorithm"], action: ({ router }) => router.push("/methodology") },
   ];
 

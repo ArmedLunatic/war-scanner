@@ -7,6 +7,17 @@ export const metadata: Metadata = {
   description: "Full historical context of the Israel–Iran conflict from the 1979 Islamic Revolution to the 2024 direct strikes.",
 };
 
+// Facts matching these keywords get the redacted "classified" treatment
+const CLASSIFIED_KEYWORDS = [
+  "assassin", "stuxnet", "attributed", "seized", "mossad", "100,000",
+  "april 19", "october 26", "april 1:", "struck", "killed", "destroyed",
+];
+
+function isClassified(fact: string): boolean {
+  const lower = fact.toLowerCase();
+  return CLASSIFIED_KEYWORDS.some((kw) => lower.includes(kw));
+}
+
 export default function ContextPage() {
   return (
     <div
@@ -241,7 +252,11 @@ export default function ContextPage() {
                     >
                       ›
                     </span>
-                    {fact}
+                    {isClassified(fact) ? (
+                      <span className="classified" title="Hover to reveal">{fact}</span>
+                    ) : (
+                      fact
+                    )}
                   </li>
                 ))}
               </ul>
