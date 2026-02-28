@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * War Scanner — Local dev ingest runner
+ * Warspy — Local dev ingest runner
  * Usage: npm run ingest
  *
  * Reads .env.local (via dotenv), then runs the full pipeline in sequence.
@@ -23,7 +23,7 @@ async function main() {
   const { publishFeedCache } = await import("../src/lib/pipeline/publish");
 
   console.log("=".repeat(60));
-  console.log("WAR SCANNER — INGEST PIPELINE");
+  console.log("WARSPY — INGEST PIPELINE");
   console.log("=".repeat(60));
   console.log(`Started at: ${new Date().toISOString()}`);
   console.log();

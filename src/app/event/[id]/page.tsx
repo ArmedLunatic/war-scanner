@@ -29,49 +29,119 @@ export default async function EventDetailPage({ params }: PageProps) {
   if (!cluster) notFound();
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-4">
-        <Link href="/" className="text-sm text-blue-600 hover:underline">
-          ← Back to feed
+    <div style={{ maxWidth: "48rem", margin: "0 auto" }}>
+      {/* Breadcrumb */}
+      <div style={{ marginBottom: "1.5rem" }}>
+        <Link
+          href="/"
+          className="link-hover-blue"
+          style={{
+            fontSize: "11px",
+            fontFamily: "var(--font-mono)",
+            letterSpacing: "0.06em",
+            color: "var(--text-muted)",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "4px",
+          }}
+        >
+          ← Feed
         </Link>
       </div>
 
       <article>
-        {/* Tags row */}
-        <div className="flex flex-wrap gap-2 mb-3">
-          <CategoryTag category={cluster.category} />
-          <ConfidenceBadge confidence={cluster.confidence} />
-          <span className="text-xs text-gray-500 self-center">
-            Score: {Math.round(cluster.score)}
-          </span>
+        {/* Hero: country + headline */}
+        <div
+          style={{
+            background: "var(--bg-card)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius)",
+            padding: "1.5rem",
+            marginBottom: "1.25rem",
+          }}
+        >
+          {cluster.country && (
+            <p
+              style={{
+                fontSize: "10px",
+                fontFamily: "var(--font-mono)",
+                fontWeight: 600,
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                color: "var(--text-muted)",
+                marginBottom: "8px",
+              }}
+            >
+              {cluster.country}
+            </p>
+          )}
+          <h1
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "var(--text-primary)",
+              lineHeight: 1.4,
+              marginBottom: "14px",
+            }}
+          >
+            {cluster.headline}
+          </h1>
+
+          {/* Tags */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center", marginBottom: "14px" }}>
+            <CategoryTag category={cluster.category} />
+            <ConfidenceBadge confidence={cluster.confidence} />
+            <span
+              style={{
+                fontSize: "10px",
+                fontFamily: "var(--font-mono)",
+                color: "var(--text-dim)",
+                letterSpacing: "0.04em",
+              }}
+            >
+              score {Math.round(cluster.score)}
+            </span>
+          </div>
+
+          {/* Timeline */}
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "16px",
+              paddingTop: "12px",
+              borderTop: "1px solid var(--border)",
+              fontSize: "11px",
+              fontFamily: "var(--font-mono)",
+              color: "var(--text-dim)",
+              letterSpacing: "0.02em",
+            }}
+          >
+            <span>First seen: {new Date(cluster.first_seen_at).toLocaleString()}</span>
+            <span>Last updated: {new Date(cluster.last_updated_at).toLocaleString()}</span>
+          </div>
         </div>
 
-        {/* Country + headline */}
-        {cluster.country && (
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-            {cluster.country}
-          </p>
-        )}
-        <h1 className="text-xl font-bold text-gray-900 mb-4 leading-snug">
-          {cluster.headline}
-        </h1>
-
-        {/* Timeline */}
-        <div className="text-xs text-gray-500 mb-6 flex gap-4 flex-wrap">
-          <span>First seen: {new Date(cluster.first_seen_at).toLocaleString()}</span>
-          <span>Last updated: {new Date(cluster.last_updated_at).toLocaleString()}</span>
-        </div>
-
-        {/* Bullets */}
+        {/* What we know */}
         {cluster.summary_know.length > 0 && (
-          <section className="mb-5">
-            <h2 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+          <section style={{ marginBottom: "1.25rem" }}>
+            <h2
+              style={{
+                fontSize: "10px",
+                fontFamily: "var(--font-mono)",
+                fontWeight: 600,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "var(--accent-green)",
+                marginBottom: "10px",
+              }}
+            >
               What we know
             </h2>
-            <ul className="space-y-2">
+            <ul className="section-know" style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
               {cluster.summary_know.map((bullet, i) => (
-                <li key={i} className="flex gap-2 text-sm text-gray-800">
-                  <span className="text-emerald-500 mt-0.5 shrink-0">✓</span>
+                <li key={i} style={{ display: "flex", gap: "10px", fontSize: "14px", color: "var(--text-secondary)" }}>
+                  <span style={{ color: "var(--accent-green)", flexShrink: 0, fontSize: "12px", marginTop: "2px" }}>✓</span>
                   <span>{bullet}</span>
                 </li>
               ))}
@@ -79,14 +149,28 @@ export default async function EventDetailPage({ params }: PageProps) {
           </section>
         )}
 
+        {/* Still unclear */}
         {cluster.summary_unclear.length > 0 && (
-          <section className="mb-5 bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <h2 className="text-sm font-semibold text-amber-800 mb-2 uppercase tracking-wide">
+          <section style={{ marginBottom: "1.25rem" }}>
+            <h2
+              style={{
+                fontSize: "10px",
+                fontFamily: "var(--font-mono)",
+                fontWeight: 600,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "var(--accent-amber)",
+                marginBottom: "10px",
+              }}
+            >
               Still unclear
             </h2>
-            <ul className="space-y-1">
+            <ul
+              className="section-unclear"
+              style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "6px" }}
+            >
               {cluster.summary_unclear.map((bullet, i) => (
-                <li key={i} className="text-sm text-amber-900">
+                <li key={i} style={{ fontSize: "14px", color: "var(--text-secondary)" }}>
                   {bullet}
                 </li>
               ))}
@@ -94,31 +178,77 @@ export default async function EventDetailPage({ params }: PageProps) {
           </section>
         )}
 
+        {/* Context */}
         {cluster.summary_why && (
-          <section className="mb-5 bg-blue-50 border border-blue-100 rounded-lg p-4">
-            <h2 className="text-sm font-semibold text-blue-800 mb-1 uppercase tracking-wide">
+          <section style={{ marginBottom: "1.25rem" }}>
+            <h2
+              style={{
+                fontSize: "10px",
+                fontFamily: "var(--font-mono)",
+                fontWeight: 600,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "var(--accent-blue)",
+                marginBottom: "10px",
+              }}
+            >
               Context
             </h2>
-            <p className="text-sm text-blue-900">{cluster.summary_why}</p>
+            <div className="section-context">
+              <p style={{ fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.6 }}>
+                {cluster.summary_why}
+              </p>
+            </div>
           </section>
         )}
 
         {/* Sources */}
-        <section className="mt-6 pt-4 border-t border-gray-200">
-          <h2 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+        <section
+          style={{
+            marginTop: "1.5rem",
+            paddingTop: "1.25rem",
+            borderTop: "1px solid var(--border)",
+          }}
+        >
+          <h2
+            style={{
+              fontSize: "10px",
+              fontFamily: "var(--font-mono)",
+              fontWeight: 600,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "var(--text-muted)",
+              marginBottom: "12px",
+            }}
+          >
             Sources ({cluster.sources.length})
           </h2>
           <SourcesList sources={cluster.sources} max={20} />
         </section>
 
-        {/* Keywords / actors */}
+        {/* Keywords */}
         {cluster.keywords.length > 0 && (
-          <section className="mt-4 pt-4 border-t border-gray-100">
-            <div className="flex flex-wrap gap-1.5">
+          <section
+            style={{
+              marginTop: "1.25rem",
+              paddingTop: "1.25rem",
+              borderTop: "1px solid var(--border)",
+            }}
+          >
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
               {cluster.keywords.slice(0, 15).map((kw) => (
                 <span
                   key={kw}
-                  className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded"
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "10px",
+                    letterSpacing: "0.04em",
+                    padding: "2px 8px",
+                    background: "var(--bg-card)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "2px",
+                    color: "var(--text-dim)",
+                  }}
                 >
                   {kw}
                 </span>

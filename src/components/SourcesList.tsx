@@ -14,21 +14,29 @@ export function SourcesList({ sources, max = 10 }: SourcesListProps) {
   const shown = sources.slice(0, max);
 
   return (
-    <ul className="space-y-1">
+    <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
       {shown.map((src, i) => (
-        <li key={i} className="flex items-start gap-2 text-sm">
-          <span className="text-gray-400 mt-0.5">↗</span>
-          <div className="min-w-0">
+        <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
+          <span style={{ color: "var(--accent-blue)", fontSize: "12px", marginTop: "1px", flexShrink: 0 }}>↗</span>
+          <div style={{ minWidth: 0 }}>
             <a
               href={src.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:underline truncate block"
+              className="link-hover-blue-soft"
+              style={{
+                color: "var(--accent-blue)",
+                fontSize: "13px",
+                display: "block",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
             >
               {src.source_name ?? src.domain ?? src.url}
             </a>
             {src.published_at && (
-              <time className="text-xs text-gray-400">
+              <time style={{ fontSize: "11px", color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>
                 {new Date(src.published_at).toLocaleString()}
               </time>
             )}
@@ -36,7 +44,7 @@ export function SourcesList({ sources, max = 10 }: SourcesListProps) {
         </li>
       ))}
       {sources.length > max && (
-        <li className="text-xs text-gray-400">
+        <li style={{ fontSize: "11px", color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>
           +{sources.length - max} more sources
         </li>
       )}

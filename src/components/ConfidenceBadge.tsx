@@ -3,18 +3,19 @@ interface ConfidenceBadgeProps {
 }
 
 const CONFIG = {
-  HIGH: { label: "High Confidence", classes: "bg-emerald-100 text-emerald-800 border-emerald-200" },
-  MED: { label: "Med Confidence", classes: "bg-amber-100 text-amber-800 border-amber-200" },
-  LOW: { label: "Low Confidence", classes: "bg-red-100 text-red-800 border-red-200" },
+  HIGH: { label: "HIGH", bg: "rgba(34,197,94,0.1)",  color: "#22c55e", border: "rgba(34,197,94,0.3)" },
+  MED:  { label: "MED",  bg: "rgba(217,119,6,0.1)",  color: "#d97706", border: "rgba(217,119,6,0.3)" },
+  LOW:  { label: "LOW",  bg: "rgba(224,62,62,0.1)",  color: "#e03e3e", border: "rgba(224,62,62,0.3)" },
 };
 
 export function ConfidenceBadge({ confidence }: ConfidenceBadgeProps) {
-  const { label, classes } = CONFIG[confidence] ?? CONFIG.LOW;
+  const c = CONFIG[confidence] ?? CONFIG.LOW;
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${classes}`}
+      className="tag-mono"
+      style={{ background: c.bg, color: c.color, borderColor: c.border }}
     >
-      {label}
+      {c.label}
     </span>
   );
 }

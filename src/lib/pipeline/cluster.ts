@@ -84,16 +84,16 @@ export async function clusterNewCandidates(): Promise<{
       .from("clusters")
       .select("*")
       .eq("is_active", true)
-      .gte("last_updated_at", clusterWindowStart)
-      .or(
-        candidate.country
-          ? `country.eq.${candidate.country},country.is.null`
-          : "country.is.null",
-      );
+      .gte("last_updated_at", clusterWindowStart);
+
+    // Filter by country in JS to avoid PostgREST escaping issues with multi-word names
+    const relevant = (nearClusters ?? []).filter((c) =>
+      !candidate.country || !c.country || c.country === candidate.country
+    );
 
     // Fetch keywords from cluster members
     const enrichedClusters: ClusterWithKeywords[] = [];
-    for (const cluster of nearClusters ?? []) {
+    for (const cluster of relevant) {
       const { data: items } = await supabase
         .from("cluster_items")
         .select("candidate_id")

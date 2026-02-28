@@ -24,7 +24,7 @@ interface ReliefWebResponse {
 
 export async function ingestReliefWeb(): Promise<{ inserted: number; skipped: number }> {
   const supabase = getServerClient();
-  const appname = process.env.RELIEFWEB_APPNAME ?? "war-scanner/1.0";
+  const appname = process.env.RELIEFWEB_APPNAME ?? "warspy/1.0";
 
   let inserted = 0;
   let skipped = 0;

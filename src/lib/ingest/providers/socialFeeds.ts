@@ -1,0 +1,254 @@
+import type { SocialPost } from "@/lib/types";
+
+// Keywords for RSS/Google News filtering
+const KEYWORDS = [
+  "israel", "iran", "idf", "irgc", "hezbollah", "hamas", "houthi",
+  "gaza", "nuclear", "missile", "netanyahu", "tehran", "tel aviv",
+  "beirut", "sanaa", "ballistic", "drone", "airstrike",
+];
+
+function matchesKeywords(text: string): boolean {
+  const lower = text.toLowerCase();
+  return KEYWORDS.some((kw) => lower.includes(kw));
+}
+
+// ─── A. RSS XML Parser ────────────────────────────────────────────────────────
+
+function parseRssItems(xml: string, sourceName: string, sourceTag: string): SocialPost[] {
+  const items: SocialPost[] = [];
+  // Extract <item> blocks
+  const itemRegex = /<item[^>]*>([\s\S]*?)<\/item>/gi;
+  let match;
+  while ((match = itemRegex.exec(xml)) !== null) {
+    const block = match[1];
+    const title = extractTag(block, "title") ?? "";
+    const link = extractTag(block, "link") ?? extractTag(block, "guid") ?? "";
+    const pubDate = extractTag(block, "pubDate") ?? extractTag(block, "dc:date") ?? "";
+
+    const cleanTitle = stripCdata(title).trim();
+    if (!cleanTitle || !matchesKeywords(cleanTitle)) continue;
+
+    const publishedAt = pubDate
+      ? new Date(pubDate.trim()).toISOString()
+      : new Date().toISOString();
+
+    items.push({
+      id: `rss-${sourceTag}-${Buffer.from(cleanTitle).toString("base64").slice(0, 16)}`,
+      text: cleanTitle,
+      source: sourceName,
+      sourceTag,
+      url: stripCdata(link).trim(),
+      publishedAt,
+      type: "rss",
+    });
+  }
+  return items;
+}
+
+function extractTag(xml: string, tag: string): string | null {
+  const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, "i");
+  const m = re.exec(xml);
+  return m ? m[1] : null;
+}
+
+function stripCdata(s: string): string {
+  return s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").replace(/<[^>]+>/g, "").trim();
+}
+
+// ─── B. RSS Sources ───────────────────────────────────────────────────────────
+
+const RSS_SOURCES = [
+  { name: "Al Jazeera", url: "https://www.aljazeera.com/xml/rss/all.xml", tag: "AJ" },
+  { name: "BBC Middle East", url: "http://feeds.bbci.co.uk/news/world/middle_east/rss.xml", tag: "BBC" },
+  { name: "Jerusalem Post", url: "https://www.jpost.com/Rss/RssFeedsHeadlines.aspx", tag: "JPost" },
+  { name: "Iran International", url: "https://www.iranintl.com/en/rss", tag: "IranIntl" },
+  { name: "Reuters World", url: "https://feeds.reuters.com/Reuters/worldNews", tag: "Reuters" },
+];
+
+async function fetchRssSources(): Promise<SocialPost[]> {
+  const results = await Promise.allSettled(
+    RSS_SOURCES.map(async (src) => {
+      const res = await fetch(src.url, {
+        headers: { "User-Agent": "warspy/1.0" },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) return [];
+      const xml = await res.text();
+      return parseRssItems(xml, src.name, src.tag).slice(0, 8);
+    })
+  );
+  return results
+    .filter((r) => r.status === "fulfilled")
+    .flatMap((r) => (r as PromiseFulfilledResult<SocialPost[]>).value);
+}
+
+// ─── C. Google News RSS ───────────────────────────────────────────────────────
+
+async function fetchGoogleNews(): Promise<SocialPost[]> {
+  try {
+    const url =
+      "https://news.google.com/rss/search?q=Israel+Iran+war+military&hl=en-US&gl=US&ceid=US:en";
+    const res = await fetch(url, {
+      headers: { "User-Agent": "warspy/1.0" },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return [];
+    const xml = await res.text();
+    return parseRssItems(xml, "Google News", "GNews").slice(0, 10);
+  } catch {
+    return [];
+  }
+}
+
+// ─── D. Reddit JSON ───────────────────────────────────────────────────────────
+
+const REDDIT_SOURCES = [
+  {
+    url: "https://www.reddit.com/r/worldnews/search.json?q=israel+iran&sort=new&limit=10&restrict_sr=1",
+    tag: "r/worldnews",
+  },
+  {
+    url: "https://www.reddit.com/r/geopolitics/new.json?limit=10",
+    tag: "r/geopolitics",
+  },
+  {
+    url: "https://www.reddit.com/r/MiddleEastNews/new.json?limit=10",
+    tag: "r/MENNews",
+  },
+];
+
+async function fetchReddit(): Promise<SocialPost[]> {
+  const results = await Promise.allSettled(
+    REDDIT_SOURCES.map(async (src) => {
+      const res = await fetch(src.url, {
+        headers: {
+          "User-Agent": "warspy/1.0 (conflict monitor)",
+          Accept: "application/json",
+        },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) return [];
+      const json = await res.json();
+      const children = json?.data?.children ?? [];
+      const posts: SocialPost[] = [];
+      for (const child of children) {
+        const d = child.data;
+        if (!d || d.is_self === false || !matchesKeywords(d.title ?? "")) {
+          // For non-self posts still check title
+          if (!d || !matchesKeywords(d.title ?? "")) continue;
+        }
+        posts.push({
+          id: `reddit-${d.id}`,
+          text: d.title,
+          source: src.tag,
+          sourceTag: src.tag,
+          url: `https://reddit.com${d.permalink}`,
+          publishedAt: new Date(d.created_utc * 1000).toISOString(),
+          score: d.score,
+          type: "reddit",
+        });
+      }
+      return posts.slice(0, 5);
+    })
+  );
+  return results
+    .filter((r) => r.status === "fulfilled")
+    .flatMap((r) => (r as PromiseFulfilledResult<SocialPost[]>).value);
+}
+
+// ─── E. NewsAPI (optional) ────────────────────────────────────────────────────
+
+async function fetchNewsApi(): Promise<SocialPost[]> {
+  const key = process.env.NEWSAPI_KEY;
+  if (!key) return [];
+  try {
+    const url =
+      `https://newsapi.org/v2/everything?q=Israel+Iran&language=en&sortBy=publishedAt&pageSize=10`;
+    const res = await fetch(url, {
+      headers: { Authorization: key },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return (json.articles ?? []).map((a: any) => ({
+      id: `news-${Buffer.from(a.url ?? a.title).toString("base64").slice(0, 16)}`,
+      text: a.title,
+      source: a.source?.name ?? "NewsAPI",
+      sourceTag: (a.source?.name ?? "NEWS").slice(0, 8),
+      url: a.url,
+      publishedAt: a.publishedAt ?? new Date().toISOString(),
+      type: "news" as const,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+// ─── F. X / Twitter (optional) ───────────────────────────────────────────────
+
+async function fetchTwitter(): Promise<SocialPost[]> {
+  const token = process.env.TWITTER_BEARER_TOKEN;
+  if (!token) return [];
+  try {
+    const query = encodeURIComponent(
+      "(Israel Iran) OR (IDF IRGC) OR (Hezbollah Israel) -is:retweet lang:en"
+    );
+    const url = `https://api.twitter.com/2/tweets/search/recent?query=${query}&max_results=10&tweet.fields=created_at,public_metrics`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return (json.data ?? []).map((t: any) => ({
+      id: `twitter-${t.id}`,
+      text: t.text,
+      source: "X (Twitter)",
+      sourceTag: "X",
+      url: `https://x.com/i/web/status/${t.id}`,
+      publishedAt: t.created_at ?? new Date().toISOString(),
+      score: t.public_metrics?.like_count,
+      type: "twitter" as const,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+// ─── Aggregate ────────────────────────────────────────────────────────────────
+
+export interface SocialFetchResult {
+  posts: SocialPost[];
+  activeSources: string[];
+}
+
+export async function fetchAllSocialSources(): Promise<SocialFetchResult> {
+  const [rss, google, reddit, newsapi, twitter] = await Promise.all([
+    fetchRssSources().catch(() => [] as SocialPost[]),
+    fetchGoogleNews().catch(() => [] as SocialPost[]),
+    fetchReddit().catch(() => [] as SocialPost[]),
+    fetchNewsApi().catch(() => [] as SocialPost[]),
+    fetchTwitter().catch(() => [] as SocialPost[]),
+  ]);
+
+  const all = [...rss, ...google, ...reddit, ...newsapi, ...twitter];
+
+  // Deduplicate by URL
+  const seen = new Set<string>();
+  const deduped = all.filter((p) => {
+    if (seen.has(p.url)) return false;
+    seen.add(p.url);
+    return true;
+  });
+
+  // Sort by recency
+  deduped.sort(
+    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+  );
+
+  const activeSources = Array.from(
+    new Set(deduped.map((p) => p.sourceTag))
+  );
+
+  return { posts: deduped.slice(0, 30), activeSources };
+}

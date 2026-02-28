@@ -74,10 +74,10 @@ export async function normalizeNewItems(): Promise<number> {
     if (insertErr) {
       // May have partial conflicts — try one by one on conflict
       for (const candidate of candidates) {
-        await supabase
+        const { error: e } = await supabase
           .from("event_candidates")
-          .insert(candidate)
-          .then(() => normalized++);
+          .insert(candidate);
+        if (!e) normalized++;
       }
     } else {
       normalized += candidates.length;

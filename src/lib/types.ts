@@ -135,3 +135,22 @@ export interface IngestStats {
   clustersCreated: number;
   clustersUpdated: number;
 }
+
+// ─── Social Feed Types ────────────────────────────────────────────────────────
+
+export interface SocialPost {
+  id: string;
+  text: string;
+  source: string;
+  sourceTag: string;
+  url: string;
+  publishedAt: string;
+  score?: number;
+  type: "rss" | "reddit" | "news" | "twitter";
+}
+
+export interface SocialResponse {
+  posts: SocialPost[];
+  generatedAt: string;
+  sources: string[];
+}

@@ -33,9 +33,39 @@ export function FilterBar() {
     country: searchParams.get("country") ?? "",
   };
 
+  const selectStyle: React.CSSProperties = {
+    background: "var(--bg)",
+    border: "1px solid var(--border)",
+    color: "var(--text-secondary)",
+    borderRadius: "var(--radius)",
+    padding: "5px 8px",
+    fontSize: "11px",
+    fontFamily: "var(--font-mono)",
+    letterSpacing: "0.04em",
+    outline: "none",
+    cursor: "pointer",
+    appearance: "none",
+    WebkitAppearance: "none",
+    paddingRight: "24px",
+    backgroundImage:
+      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7a8d'/%3E%3C/svg%3E\")",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "right 8px center",
+  };
+
   return (
-    <div className="flex flex-wrap gap-3 items-center">
-      <span className="text-sm font-medium text-gray-700">Filter:</span>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
+      <span
+        style={{
+          fontSize: "10px",
+          fontFamily: "var(--font-mono)",
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          color: "var(--text-dim)",
+        }}
+      >
+        Filter
+      </span>
 
       {/* Country */}
       <input
@@ -43,14 +73,15 @@ export function FilterBar() {
         placeholder="Country..."
         value={current.country}
         onChange={(e) => handleChange("country", e.target.value)}
-        className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
+        className="input-dark"
+        style={{ width: "120px" }}
       />
 
       {/* Category */}
       <select
         value={current.category}
         onChange={(e) => handleChange("category", e.target.value)}
-        className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        style={selectStyle}
       >
         <option value="">All categories</option>
         {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
@@ -64,7 +95,7 @@ export function FilterBar() {
       <select
         value={current.confidence}
         onChange={(e) => handleChange("confidence", e.target.value)}
-        className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        style={selectStyle}
       >
         <option value="">All confidence</option>
         <option value="HIGH">High</option>
@@ -76,9 +107,20 @@ export function FilterBar() {
       {(current.category || current.confidence || current.country) && (
         <button
           onClick={() => router.push(pathname)}
-          className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 underline"
+          style={{
+            background: "none",
+            border: "none",
+            fontSize: "10px",
+            fontFamily: "var(--font-mono)",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "var(--text-muted)",
+            cursor: "pointer",
+            textDecoration: "underline",
+            padding: "5px 0",
+          }}
         >
-          Clear filters
+          Clear
         </button>
       )}
     </div>

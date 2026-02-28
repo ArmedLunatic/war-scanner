@@ -27,12 +27,19 @@ export function LastUpdated({ generatedAt }: LastUpdatedProps) {
   }, [generatedAt]);
 
   return (
-    <p className="text-sm text-gray-500">
-      Feed updated{" "}
+    <p
+      style={{
+        fontSize: "11px",
+        fontFamily: "var(--font-mono)",
+        color: "var(--text-dim)",
+        letterSpacing: "0.02em",
+      }}
+    >
+      Updated{" "}
       <time
         dateTime={generatedAt}
         title={new Date(generatedAt).toLocaleString()}
-        className="font-medium text-gray-700"
+        style={{ color: "var(--text-muted)" }}
       >
         {relative}
       </time>

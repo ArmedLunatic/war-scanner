@@ -1,4 +1,4 @@
-# War Scanner
+# Warspy
 
 Near-real-time global conflict event monitor. Aggregates, deduplicates, and ranks reports from **GDELT 2.1** and **ReliefWeb**. No LLM inference. No full article storage.
 
@@ -25,7 +25,7 @@ Near-real-time global conflict event monitor. Aggregates, deduplicates, and rank
 
 ```bash
 git clone <repo>
-cd war-scanner
+cd warspy
 npm install
 ```
 
@@ -143,4 +143,4 @@ recency:     100 × exp(−ageHours / 10), 0–100
 
 ## Legal
 
-War Scanner stores only titles, URLs, and brief metadata snippets. No full article text is cached or reproduced. All source links open the original publisher. GDELT is open-licensed; ReliefWeb content is Creative Commons.
+Warspy stores only titles, URLs, and brief metadata snippets. No full article text is cached or reproduced. All source links open the original publisher. GDELT is open-licensed; ReliefWeb content is Creative Commons.

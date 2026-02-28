@@ -20,22 +20,36 @@ function formatRelativeDate(isoString: string): string {
   return `${Math.floor(diffHours / 24)}d ago`;
 }
 
-const SEVERITY_BARS: Record<number, { fill: number; color: string }> = {
-  1: { fill: 1, color: "bg-green-400" },
-  2: { fill: 2, color: "bg-yellow-400" },
-  3: { fill: 3, color: "bg-orange-400" },
-  4: { fill: 4, color: "bg-red-400" },
-  5: { fill: 5, color: "bg-red-600" },
+const SEVERITY_ACCENT: Record<number, string> = {
+  1: "#22c55e",
+  2: "#22c55e",
+  3: "#d97706",
+  4: "#f97316",
+  5: "#e03e3e",
+};
+
+const SEVERITY_PIP: Record<number, string> = {
+  1: "#22c55e",
+  2: "#22c55e",
+  3: "#d97706",
+  4: "#f97316",
+  5: "#e03e3e",
 };
 
 function SeverityIndicator({ level }: { level: number }) {
-  const { fill, color } = SEVERITY_BARS[level] ?? SEVERITY_BARS[1];
+  const color = SEVERITY_PIP[level] ?? SEVERITY_PIP[1];
   return (
-    <div className="flex gap-0.5 items-center" title={`Severity ${level}/5`}>
+    <div style={{ display: "flex", gap: "3px", alignItems: "center" }} title={`Severity ${level}/5`}>
       {Array.from({ length: 5 }).map((_, i) => (
         <div
           key={i}
-          className={`h-2 w-2 rounded-sm ${i < fill ? color : "bg-gray-200"}`}
+          style={{
+            width: "7px",
+            height: "7px",
+            borderRadius: "1px",
+            background: i < level ? color : "var(--border-bright)",
+            transition: "background 0.1s",
+          }}
         />
       ))}
     </div>
@@ -49,48 +63,89 @@ export function EventCard({ cluster }: EventCardProps) {
     ? countryToFlag(cluster.country)
     : "🌐";
 
+  const accent = SEVERITY_ACCENT[cluster.severity] ?? SEVERITY_ACCENT[1];
+
   return (
-    <article className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
-      {/* Header row */}
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex flex-wrap gap-2 items-center">
-          <CategoryTag category={cluster.category} />
-          <ConfidenceBadge confidence={cluster.confidence} />
-          <SeverityIndicator level={cluster.severity} />
+    <article
+      className={`event-card sev-${cluster.severity}`}
+      style={{ borderLeftColor: accent, padding: "1rem 1.25rem" }}
+    >
+      {/* Location + time row */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <span style={{ fontSize: "14px" }}>{flagEmoji}</span>
+          {cluster.country && (
+            <span
+              style={{
+                fontSize: "10px",
+                fontFamily: "var(--font-mono)",
+                fontWeight: 600,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: "var(--text-muted)",
+              }}
+            >
+              {cluster.country}
+            </span>
+          )}
         </div>
         <time
           dateTime={cluster.last_updated_at}
-          className="text-xs text-gray-400 whitespace-nowrap shrink-0"
           title={new Date(cluster.last_updated_at).toLocaleString()}
+          style={{
+            fontSize: "11px",
+            fontFamily: "var(--font-mono)",
+            color: "var(--text-dim)",
+            whiteSpace: "nowrap",
+          }}
         >
           {formatRelativeDate(cluster.last_updated_at)}
         </time>
       </div>
 
-      {/* Country + headline */}
-      <div className="mb-3">
-        <div className="flex items-center gap-1.5 mb-1">
-          <span className="text-base">{flagEmoji}</span>
-          {cluster.country && (
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-              {cluster.country}
-            </span>
-          )}
-        </div>
-        <Link href={`/event/${cluster.id}`} className="group">
-          <h2 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 leading-snug">
-            {cluster.headline}
-          </h2>
-        </Link>
+      {/* Headline */}
+      <Link href={`/event/${cluster.id}`}>
+        <h2
+          style={{
+            fontSize: "15px",
+            fontWeight: 600,
+            color: "var(--text-primary)",
+            lineHeight: 1.4,
+            marginBottom: "10px",
+            transition: "color 0.12s",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLHeadingElement).style.color = "var(--accent-blue)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLHeadingElement).style.color = "var(--text-primary)"; }}
+        >
+          {cluster.headline}
+        </h2>
+      </Link>
+
+      {/* Tags + severity row */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center", marginBottom: "12px" }}>
+        <CategoryTag category={cluster.category} />
+        <ConfidenceBadge confidence={cluster.confidence} />
+        <SeverityIndicator level={cluster.severity} />
+        {cluster.actors.length > 0 && (
+          <span
+            style={{
+              fontSize: "11px",
+              color: "var(--text-dim)",
+              fontFamily: "var(--font-mono)",
+            }}
+          >
+            {cluster.actors.slice(0, 3).join(" · ")}
+          </span>
+        )}
       </div>
 
       {/* Know bullets */}
       {cluster.summary_know.length > 0 && (
-        <ul className="mb-3 space-y-1">
+        <ul style={{ marginBottom: "12px", display: "flex", flexDirection: "column", gap: "5px" }}>
           {(expanded ? cluster.summary_know : cluster.summary_know.slice(0, 2)).map(
             (bullet, i) => (
-              <li key={i} className="flex gap-2 text-sm text-gray-700">
-                <span className="text-gray-400 shrink-0 mt-0.5">•</span>
+              <li key={i} style={{ display: "flex", gap: "8px", fontSize: "13px", color: "var(--text-secondary)" }}>
+                <span style={{ color: "var(--accent-green)", flexShrink: 0, marginTop: "1px", fontSize: "11px" }}>✓</span>
                 <span>{bullet}</span>
               </li>
             ),
@@ -99,22 +154,41 @@ export function EventCard({ cluster }: EventCardProps) {
             <li>
               <button
                 onClick={() => setExpanded(!expanded)}
-                className="text-xs text-blue-600 hover:underline ml-4"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "11px",
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--accent-blue)",
+                  padding: "0",
+                  marginLeft: "16px",
+                }}
               >
-                {expanded ? "Show less" : `+${cluster.summary_know.length - 2} more`}
+                {expanded ? "show less" : `+${cluster.summary_know.length - 2} more`}
               </button>
             </li>
           )}
         </ul>
       )}
 
-      {/* Unclear bullets (collapsed by default) */}
+      {/* Unclear bullets (expanded) */}
       {expanded && cluster.summary_unclear.length > 0 && (
-        <div className="mb-3 bg-amber-50 border border-amber-100 rounded p-3">
-          <p className="text-xs font-medium text-amber-700 mb-1">Still unclear:</p>
-          <ul className="space-y-1">
+        <div
+          style={{
+            marginBottom: "12px",
+            background: "rgba(217,119,6,0.06)",
+            border: "1px solid rgba(217,119,6,0.2)",
+            borderRadius: "var(--radius)",
+            padding: "10px 12px",
+          }}
+        >
+          <p style={{ fontSize: "10px", fontFamily: "var(--font-mono)", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--accent-amber)", marginBottom: "6px" }}>
+            Still unclear
+          </p>
+          <ul style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
             {cluster.summary_unclear.map((bullet, i) => (
-              <li key={i} className="text-xs text-amber-800">
+              <li key={i} style={{ fontSize: "12px", color: "#d97706" }}>
                 {bullet}
               </li>
             ))}
@@ -123,15 +197,39 @@ export function EventCard({ cluster }: EventCardProps) {
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingTop: "10px",
+          borderTop: "1px solid var(--border)",
+        }}
+      >
         <Link
           href={`/event/${cluster.id}`}
-          className="text-xs text-gray-500 hover:text-blue-600"
+          style={{
+            fontSize: "11px",
+            fontFamily: "var(--font-mono)",
+            color: "var(--text-muted)",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            transition: "color 0.12s",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--accent-blue)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-muted)"; }}
         >
-          {cluster.sources_count} source{cluster.sources_count !== 1 ? "s" : ""} →
+          {cluster.sources_count} source{cluster.sources_count !== 1 ? "s" : ""} · View details →
         </Link>
-        <span className="text-xs text-gray-400">
-          Score: {Math.round(cluster.score)}
+        <span
+          style={{
+            fontSize: "11px",
+            fontFamily: "var(--font-mono)",
+            color: "var(--text-dim)",
+          }}
+        >
+          score {Math.round(cluster.score)}
         </span>
       </div>
     </article>

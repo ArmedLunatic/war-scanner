@@ -26,58 +26,131 @@ export default async function BriefPage() {
   const brief = await getBrief(12);
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">
+    <div style={{ maxWidth: "48rem", margin: "0 auto" }}>
+      {/* Header */}
+      <div style={{ marginBottom: "2rem" }}>
+        <h1
+          style={{
+            fontSize: "20px",
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            marginBottom: "6px",
+            fontFamily: "var(--font-mono)",
+            letterSpacing: "0.02em",
+            textTransform: "uppercase",
+          }}
+        >
           Top 10 — Last 12 Hours
         </h1>
-        <p className="text-sm text-gray-600">
-          The highest-scoring conflict events from the past 12 hours, ranked by
-          severity, source corroboration, and recency.
+        <p style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.6 }}>
+          Highest-scoring conflict events ranked by severity, source corroboration, and recency.
         </p>
         {brief && (
-          <p className="text-xs text-gray-400 mt-1">
-            Generated: {new Date(brief.generatedAt).toLocaleString()}
+          <p
+            style={{
+              fontSize: "11px",
+              fontFamily: "var(--font-mono)",
+              color: "var(--text-dim)",
+              marginTop: "6px",
+            }}
+          >
+            Generated {new Date(brief.generatedAt).toLocaleString()}
           </p>
         )}
       </div>
 
       {!brief || brief.clusters.length === 0 ? (
-        <div className="text-center py-20 text-gray-500">
-          <p className="text-lg font-medium mb-2">No events in the last 12 hours</p>
-          <Link href="/" className="text-blue-600 underline text-sm">
+        <div className="empty-state">
+          <p style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "10px" }}>
+            No events in the last 12 hours
+          </p>
+          <Link
+            href="/"
+            style={{
+              fontSize: "12px",
+              fontFamily: "var(--font-mono)",
+              color: "var(--accent-blue)",
+              textDecoration: "underline",
+            }}
+          >
             View all events →
           </Link>
         </div>
       ) : (
-        <ol className="space-y-4">
+        <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
           {brief.clusters.map((cluster, i) => (
-            <li key={cluster.id} className="flex gap-4">
-              <span className="text-2xl font-bold text-gray-300 w-8 shrink-0 text-right">
-                {i + 1}
+            <li key={cluster.id} style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+              {/* Rank number */}
+              <span className="rank-num">
+                {String(i + 1).padStart(2, "0")}
               </span>
-              <div className="flex-1 bg-white border border-gray-200 rounded-lg p-4">
-                <div className="flex flex-wrap gap-2 mb-2">
+
+              {/* Card */}
+              <div
+                style={{
+                  flex: 1,
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius)",
+                  padding: "14px 16px",
+                }}
+              >
+                {/* Tags row */}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center", marginBottom: "8px" }}>
                   <CategoryTag category={cluster.category} />
                   <ConfidenceBadge confidence={cluster.confidence} />
                   {cluster.country && (
-                    <span className="text-xs text-gray-500 self-center">
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        fontFamily: "var(--font-mono)",
+                        letterSpacing: "0.08em",
+                        textTransform: "uppercase",
+                        color: "var(--text-muted)",
+                      }}
+                    >
                       {cluster.country}
                     </span>
                   )}
                 </div>
+
+                {/* Headline */}
                 <Link
                   href={`/event/${cluster.id}`}
-                  className="block font-semibold text-gray-900 hover:text-blue-700 text-sm leading-snug mb-2"
+                  className="link-hover-blue"
+                  style={{
+                    display: "block",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    color: "var(--text-primary)",
+                    lineHeight: 1.4,
+                    marginBottom: "8px",
+                  }}
                 >
                   {cluster.headline}
                 </Link>
+
+                {/* First bullet */}
                 {cluster.summary_know[0] && (
-                  <p className="text-xs text-gray-600">{cluster.summary_know[0]}</p>
+                  <p style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.5, marginBottom: "10px" }}>
+                    {cluster.summary_know[0]}
+                  </p>
                 )}
-                <div className="mt-2 text-xs text-gray-400">
-                  {cluster.sources_count} source{cluster.sources_count !== 1 ? "s" : ""} ·{" "}
-                  Score: {Math.round(cluster.score)}
+
+                {/* Footer */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: "11px",
+                    fontFamily: "var(--font-mono)",
+                    color: "var(--text-dim)",
+                    paddingTop: "8px",
+                    borderTop: "1px solid var(--border)",
+                  }}
+                >
+                  <span>{cluster.sources_count} source{cluster.sources_count !== 1 ? "s" : ""}</span>
+                  <span>score {Math.round(cluster.score)}</span>
                 </div>
               </div>
             </li>
