@@ -316,22 +316,23 @@ export function OverlayNav() {
             href={WARSPY_DEV_X_URL}
             target="_blank"
             rel="noopener noreferrer"
+            title={`Dev X: ${WARSPY_DEV_X_HANDLE}`}
             style={{
               fontFamily: "var(--font-mono)",
-              fontSize: "9px",
+              fontSize: "8px",
               letterSpacing: "0.08em",
               color: "#6b7a8d",
               border: "1px solid rgba(45,63,84,0.6)",
               borderRadius: "999px",
-              padding: "5px 10px",
-              height: "28px",
+              padding: "4px 8px",
+              height: "26px",
               display: "inline-flex",
               alignItems: "center",
               background: "rgba(10,14,20,0.28)",
               whiteSpace: "nowrap",
             }}
           >
-            Dev X: {WARSPY_DEV_X_HANDLE}
+            {WARSPY_DEV_X_HANDLE}
           </a>
         </div>
 
