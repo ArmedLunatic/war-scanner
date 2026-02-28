@@ -153,22 +153,50 @@ export function LiveFeedPanel() {
       ) : clusters.length === 0 ? (
         <div
           style={{
-            padding: "20px",
+            padding: "28px 20px",
             textAlign: "center",
-            fontSize: "11px",
-            color: "#6b7a8d",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "12px",
           }}
         >
-          No events — run{" "}
-          <code
+          <div
             style={{
               fontFamily: "var(--font-mono)",
-              color: "#60a5fa",
               fontSize: "10px",
+              color: "#3d4f63",
+              letterSpacing: "0.1em",
             }}
           >
-            npm run ingest
-          </code>
+            No events yet
+          </div>
+          <button
+            onClick={fetchFeed}
+            style={{
+              background: "rgba(96,165,250,0.08)",
+              border: "1px solid rgba(96,165,250,0.2)",
+              borderRadius: "3px",
+              cursor: "pointer",
+              padding: "7px 18px",
+              fontFamily: "var(--font-mono)",
+              fontSize: "10px",
+              letterSpacing: "0.1em",
+              color: "#60a5fa",
+              textTransform: "uppercase",
+              transition: "background 0.12s, border-color 0.12s",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "rgba(96,165,250,0.14)";
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(96,165,250,0.35)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "rgba(96,165,250,0.08)";
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(96,165,250,0.2)";
+            }}
+          >
+            ↻ Refresh
+          </button>
         </div>
       ) : (
         <div>
@@ -259,10 +287,31 @@ export function LiveFeedPanel() {
           <div
             style={{
               padding: "8px 14px",
-              textAlign: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
               borderTop: "1px solid rgba(30,42,56,0.6)",
             }}
           >
+            <button
+              onClick={fetchFeed}
+              title="Refresh feed"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "var(--font-mono)",
+                fontSize: "9px",
+                letterSpacing: "0.08em",
+                color: "#3d4f63",
+                padding: "2px 4px",
+                transition: "color 0.12s",
+              }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#60a5fa")}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#3d4f63")}
+            >
+              ↻ Pull
+            </button>
             <a
               href="/feed"
               style={{
