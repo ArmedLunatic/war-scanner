@@ -24,16 +24,24 @@ export function SocialFeedPanel() {
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [sources, setSources] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const fetchSocial = useCallback(async () => {
     try {
-      const res = await fetch("/api/social", { cache: "no-store" });
-      if (!res.ok) return;
+      const res = await fetch("/api/social", {
+        cache: "no-store",
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!res.ok) {
+        setError(true);
+        return;
+      }
       const data: SocialResponse = await res.json();
       setPosts(data.posts);
       setSources(data.sources);
+      setError(false);
     } catch {
-      // noop
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -59,6 +67,46 @@ export function SocialFeedPanel() {
           }}
         >
           LOADING...
+        </div>
+      ) : error ? (
+        <div
+          style={{
+            padding: "20px 16px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              letterSpacing: "0.12em",
+              color: "#e03e3e",
+              textTransform: "uppercase",
+              textAlign: "center",
+            }}
+          >
+            DATA UNAVAILABLE — SOURCE OFFLINE
+          </div>
+          <button
+            onClick={() => { setLoading(true); fetchSocial(); }}
+            style={{
+              background: "rgba(224,62,62,0.08)",
+              border: "1px solid rgba(224,62,62,0.25)",
+              borderRadius: "3px",
+              cursor: "pointer",
+              padding: "6px 16px",
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              letterSpacing: "0.1em",
+              color: "#e03e3e",
+              textTransform: "uppercase",
+            }}
+          >
+            ↻ Retry
+          </button>
         </div>
       ) : (
         <div>

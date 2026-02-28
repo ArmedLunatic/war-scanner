@@ -126,16 +126,18 @@ export default async function HeatmapPage() {
 
         {/* Stats */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "8px", marginBottom: "2rem" }}>
-          {[
-            { label: "Total Events", value: totalEvents, color: "#60a5fa" },
-            { label: "Active Days", value: `${activeDays}/90`, color: "#22c55e" },
-            { label: "Avg / Active Day", value: avgPerActive, color: "#fbbf24" },
-            { label: "Peak Day", value: peakDay.count > 0 ? `${peakDay.count} evt` : "—", color: "#e03e3e", sub: peakDay.count > 0 ? peakDay.date : "" },
-          ].map((s) => (
+          {(
+            [
+              { label: "Total Events", value: totalEvents, color: "#60a5fa" },
+              { label: "Active Days", value: `${activeDays}/90`, color: "#22c55e" },
+              { label: "Avg / Active Day", value: avgPerActive, color: "#fbbf24" },
+              { label: "Peak Day", value: peakDay.count > 0 ? `${peakDay.count} evt` : "—", color: "#e03e3e", sub: peakDay.count > 0 ? peakDay.date : "" },
+            ] as { label: string; value: string | number; color: string; sub?: string }[]
+          ).map((s) => (
             <div key={s.label} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "12px 14px" }}>
               <div style={{ fontFamily: "var(--font-mono)", fontSize: "8px", letterSpacing: "0.12em", color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "6px" }}>{s.label}</div>
               <div style={{ fontFamily: "var(--font-mono)", fontSize: "20px", fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</div>
-              {(s as any).sub && <div style={{ fontFamily: "var(--font-mono)", fontSize: "8px", color: "#3d4f63", marginTop: "3px" }}>{(s as any).sub}</div>}
+              {s.sub && <div style={{ fontFamily: "var(--font-mono)", fontSize: "8px", color: "#3d4f63", marginTop: "3px" }}>{s.sub}</div>}
             </div>
           ))}
         </div>

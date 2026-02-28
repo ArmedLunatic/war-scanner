@@ -56,7 +56,7 @@ export async function publishFeedCache(): Promise<void> {
   }
 
   for (const [country, cards] of byCountry.entries()) {
-    const iso = country.toLowerCase().replace(/\s+/g, "-").slice(0, 10);
+    const iso = country.toLowerCase().replace(/\s+/g, "-");
     await supabase.from("feed_cache").upsert(
       {
         key: `country:${iso}`,

@@ -36,7 +36,7 @@ const ACTORS: Actor[] = [
     capability: "Advanced multi-domain warfare, nuclear-armed",
     personnel: "~170,000 active + 465,000 reserve",
     founded: "1948",
-    leadership: "Chief of Staff: Lt. Gen. Herzi Halevi",
+    leadership: "Chief of Staff: Lt. Gen. Eyal Zamir (Mar 2025)",
     ideology: "Deterrence-based defense doctrine (Dahiya)",
     keyCapabilities: [
       "F-35I Adir stealth fighters (50+ aircraft)",
@@ -45,7 +45,7 @@ const ACTORS: Actor[] = [
       "Cyber Unit 8200 — world-class offensive capabilities",
       "Mossad joint operations for preemptive strikes",
     ],
-    recentActivity: "Oct 2024: Extensive airstrikes on Iran's air defense radars in Isfahan. Ongoing strikes on Hezbollah infrastructure in Lebanon. Ground operation in Gaza.",
+    recentActivity: "Oct 2024: Extensive airstrikes on Iran's air defense radars in Isfahan. Jan 2025: Gaza ceasefire phase 1 entered; hostage-for-prisoner exchange ongoing. Ongoing northern border operations post-ceasefire with Hezbollah.",
     threat: "CRITICAL",
   },
   {
@@ -82,7 +82,7 @@ const ACTORS: Actor[] = [
     capability: "World's premier foreign intelligence & covert action",
     personnel: "~7,000 (est.)",
     founded: "1949",
-    leadership: "Director: David Barnea",
+    leadership: "Director: Eli Cohen (2025)",
     ideology: "Active prevention — 'Never Again' through intelligence superiority",
     keyCapabilities: [
       "HUMINT networks inside Iran, Lebanon, Gaza",
@@ -91,7 +91,7 @@ const ACTORS: Actor[] = [
       "Pegasus-class cyber intelligence collection",
       "Supply chain interdiction of missile components",
     ],
-    recentActivity: "Jul 2024: Hamas chief Haniyeh killed in Tehran. Apr 2024: Pager/radio detonation against Hezbollah operatives. Ongoing sabotage of IRGC supply lines in Syria.",
+    recentActivity: "Jul 2024: Hamas chief Haniyeh killed in Tehran. Sep 2024: Pager/radio detonation devastated Hezbollah command. Jan 2025: Ceasefire mediation for Gaza hostage deal. Ongoing IRGC supply-line interdiction in Syria.",
     threat: "CRITICAL",
   },
   {
@@ -128,7 +128,7 @@ const ACTORS: Actor[] = [
     capability: "Urban warfare, tunnel network, Oct 7 breakthrough",
     personnel: "~30,000–40,000 (pre-war est.)",
     founded: "1987",
-    leadership: "Military Wing: Mohammed Deif (status unclear), Sinwar killed Oct 2024",
+    leadership: "Military Wing: Mohammed Deif (killed Jul 2024); post-Sinwar leadership restructuring",
     ideology: "Sunni Islamism; Palestinian nationalism",
     keyCapabilities: [
       "Extensive tunnel network under Gaza",
@@ -137,7 +137,7 @@ const ACTORS: Actor[] = [
       "IED manufacturing and urban ambush tactics",
       "Hostage-taking as strategic leverage",
     ],
-    recentActivity: "Oct 7, 2023: Mass attack on Israel — 1,200 killed, 251 taken hostage. Ongoing urban resistance in Gaza. Oct 2024: Leader Yahya Sinwar killed in Rafah. Leadership significantly degraded.",
+    recentActivity: "Oct 7, 2023: Mass attack on Israel — 1,200 killed, 251 taken hostage. Oct 2024: Sinwar killed in Rafah. Jan 2025: Phase 1 ceasefire with hostage-prisoner exchange. Leadership structure significantly degraded; political bureau reconstituting.",
     threat: "HIGH",
   },
   {
@@ -160,7 +160,7 @@ const ACTORS: Actor[] = [
       "Kamikaze USVs (unmanned surface vehicles)",
       "Land forces experienced from Yemeni civil war",
     ],
-    recentActivity: "Nov 2023–present: 90+ attacks on commercial shipping in Red Sea. Multiple missile strikes at Israel (intercepted by Arrow/US). US-UK Operation Prosperity Guardian airstrikes ongoing.",
+    recentActivity: "Nov 2023–present: 100+ attacks on commercial shipping in Red Sea. 2025: US military strikes on Houthi leadership and infrastructure intensified under Operation Rough Rider; multiple senior commanders killed. Continued long-range ballistic missiles toward Israel.",
     threat: "MED",
   },
   {
@@ -344,7 +344,7 @@ export default function ActorsPage() {
         </div>
 
         <div style={{ marginTop: "1.5rem", fontFamily: "var(--font-mono)", fontSize: "8px", color: "#1e2a38", letterSpacing: "0.06em", textAlign: "center" }}>
-          OPEN-SOURCE INTELLIGENCE ASSESSMENT · SOURCES: IISS, CSIS, ACLED, SIPRI · UPDATED FEB 2025
+          OPEN-SOURCE INTELLIGENCE ASSESSMENT · SOURCES: IISS, CSIS, ACLED, SIPRI · UPDATED FEB 2026
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { PanelShell } from "./PanelShell";
+import type { ClusterCard } from "@/lib/types";
 
 interface BriefItem {
   rank: number;
@@ -13,7 +14,7 @@ interface BriefItem {
 }
 
 interface BriefResponse {
-  items: BriefItem[];
+  clusters: ClusterCard[];
   generatedAt: string;
 }
 
@@ -27,27 +28,32 @@ function severityColor(s: number) {
 export function BriefPanel() {
   const [items, setItems] = useState<BriefItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const fetchBrief = useCallback(async () => {
     try {
-      const res = await fetch("/api/brief", { cache: "no-store" });
-      if (!res.ok) return;
+      const res = await fetch("/api/brief", {
+        cache: "no-store",
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!res.ok) {
+        setError(true);
+        return;
+      }
       const data: BriefResponse = await res.json();
-      // brief returns top clusters — map to our shape
-      const mapped = (data as any).clusters ?? data.items ?? [];
-      setItems(
-        mapped.slice(0, 10).map((c: any, i: number) => ({
-          rank: i + 1,
-          headline: c.headline,
-          score: c.score,
-          country: c.country,
-          severity: c.severity,
-          confidence: c.confidence,
-          id: c.id,
-        }))
-      );
+      const mapped = (data.clusters ?? []).slice(0, 10).map((c, i) => ({
+        rank: i + 1,
+        headline: c.headline,
+        score: c.score,
+        country: c.country,
+        severity: c.severity,
+        confidence: c.confidence,
+        id: c.id,
+      }));
+      setItems(mapped);
+      setError(false);
     } catch {
-      // noop
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -71,6 +77,46 @@ export function BriefPanel() {
           }}
         >
           LOADING...
+        </div>
+      ) : error ? (
+        <div
+          style={{
+            padding: "20px 16px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              letterSpacing: "0.12em",
+              color: "#e03e3e",
+              textTransform: "uppercase",
+              textAlign: "center",
+            }}
+          >
+            DATA UNAVAILABLE — SOURCE OFFLINE
+          </div>
+          <button
+            onClick={() => { setLoading(true); fetchBrief(); }}
+            style={{
+              background: "rgba(224,62,62,0.08)",
+              border: "1px solid rgba(224,62,62,0.25)",
+              borderRadius: "3px",
+              cursor: "pointer",
+              padding: "6px 16px",
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              letterSpacing: "0.1em",
+              color: "#e03e3e",
+              textTransform: "uppercase",
+            }}
+          >
+            ↻ Retry
+          </button>
         </div>
       ) : (
         <div>

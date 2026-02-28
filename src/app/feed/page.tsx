@@ -25,6 +25,7 @@ async function getFeed(params: Awaited<PageProps["searchParams"]>): Promise<Feed
   try {
     const res = await fetch(`${base}/api/events?${qs.toString()}`, {
       next: { revalidate: 180 },
+      signal: AbortSignal.timeout(10_000),
     });
     if (!res.ok) return null;
     return res.json();

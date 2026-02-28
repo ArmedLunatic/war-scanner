@@ -13,16 +13,37 @@ interface PanelContextValue {
 
 const PanelContext = createContext<PanelContextValue | null>(null);
 
+const STORAGE_KEY = "warspy:openPanels";
+
 function isMobileWidth() {
   return typeof window !== "undefined" && window.innerWidth < 769;
 }
 
+function readPersistedPanels(): Set<PanelId> {
+  if (typeof window === "undefined") return new Set(["live"]);
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const ids = JSON.parse(raw) as PanelId[];
+      return new Set(ids);
+    }
+  } catch {
+    // ignore parse errors
+  }
+  // Default: mobile = none, desktop = live
+  return new Set(isMobileWidth() ? [] : ["live"]);
+}
+
+function persistPanels(panels: Set<PanelId>) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...panels]));
+  } catch {
+    // ignore storage errors
+  }
+}
+
 export function PanelProvider({ children }: { children: React.ReactNode }) {
-  // On mobile: start with no panels open (globe loads clean)
-  // On desktop: start with live panel open
-  const [openPanels, setOpenPanels] = useState<Set<PanelId>>(
-    () => new Set(isMobileWidth() ? [] : ["live"])
-  );
+  const [openPanels, setOpenPanels] = useState<Set<PanelId>>(readPersistedPanels);
 
   const toggle = useCallback((id: PanelId) => {
     setOpenPanels((prev) => {
@@ -34,6 +55,7 @@ export function PanelProvider({ children }: { children: React.ReactNode }) {
         if (isMobileWidth()) next.clear();
         next.add(id);
       }
+      persistPanels(next);
       return next;
     });
   }, []);
@@ -44,11 +66,16 @@ export function PanelProvider({ children }: { children: React.ReactNode }) {
     setOpenPanels((prev) => {
       const next = new Set(prev);
       next.delete(id);
+      persistPanels(next);
       return next;
     });
   }, []);
 
-  const closeAll = useCallback(() => setOpenPanels(new Set()), []);
+  const closeAll = useCallback(() => {
+    const empty = new Set<PanelId>();
+    persistPanels(empty);
+    setOpenPanels(empty);
+  }, []);
 
   return (
     <PanelContext.Provider value={{ openPanels, toggle, isOpen, close, closeAll }}>

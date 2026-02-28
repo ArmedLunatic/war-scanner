@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Iran uranium enrichment status, breakout timeline, and IAEA monitoring data.",
 };
 
-const ENRICHMENT_LEVEL = 60; // % U-235 (as of 2023 IAEA reports)
+const ENRICHMENT_LEVEL = 60; // % U-235 (IAEA 2025 — no change from 60% peak)
 
 const THRESHOLDS = [
   { pct: 0,    label: "Natural",       color: "#22c55e",  desc: "0.7% — natural uranium ore" },
@@ -26,6 +26,8 @@ const MILESTONES = [
   { year: "2021", event: "Iran begins enriching to 20%, then 60% after Natanz attack", type: "danger" },
   { year: "2023", event: "IAEA: Iran has enough 60% material for several bombs if further enriched", type: "danger" },
   { year: "2024", event: "IAEA access severely curtailed; additional centrifuge cascades activated", type: "danger" },
+  { year: "2025", event: "IAEA: 60% stockpile reaches ~275 kg — sufficient material for multiple weapons if enriched to 90%", type: "danger" },
+  { year: "2025", event: "Diplomatic backchannel talks with US reported; no formal agreement reached", type: "neutral" },
 ];
 
 const STATS = [
@@ -33,7 +35,7 @@ const STATS = [
   { label: "Weapons Grade", value: "90%", sub: "threshold", color: "#e03e3e" },
   { label: "Breakout Time", value: "~1–2 wks", sub: "est. to enrich to 90%", color: "#fbbf24" },
   { label: "Active Centrifuges", value: "~9,000+", sub: "IR-1, IR-2M, IR-6", color: "#60a5fa" },
-  { label: "60% Stockpile", value: "~121 kg", sub: "as of Nov 2023 IAEA", color: "#a78bfa" },
+  { label: "60% Stockpile", value: "~275 kg", sub: "est. Feb 2026 (IAEA 2025)", color: "#a78bfa" },
   { label: "Monitoring", value: "CURTAILED", sub: "IAEA cameras removed", color: "#e03e3e" },
 ];
 
@@ -528,7 +530,7 @@ export default function NuclearPage() {
             textAlign: "center",
           }}
         >
-          INTELLIGENCE ASSESSMENT · SOURCES: IAEA, SIPRI, ARMS CONTROL ASSOCIATION · DATA AS OF NOV 2023
+          INTELLIGENCE ASSESSMENT · SOURCES: IAEA, SIPRI, ARMS CONTROL ASSOCIATION · DATA AS OF FEB 2026
         </div>
       </div>
 

@@ -29,6 +29,7 @@ function sentencesFromSnippet(snippet: string): string[] {
 export async function summarizeAllClusters(): Promise<void> {
   const supabase = getServerClient();
 
+  // 1. Load all active clusters (1 query)
   const { data: clusters, error } = await supabase
     .from("clusters")
     .select("*")
@@ -37,32 +38,69 @@ export async function summarizeAllClusters(): Promise<void> {
   if (error) throw new Error(`summarizeAllClusters: ${error.message}`);
   if (!clusters || clusters.length === 0) return;
 
-  for (const cluster of clusters as Cluster[]) {
-    const { data: items } = await supabase
-      .from("cluster_items")
-      .select("candidate_id")
-      .eq("cluster_id", cluster.id);
+  const clusterList = clusters as Cluster[];
+  const clusterIds = clusterList.map((c) => c.id);
 
-    const memberIds = (items ?? []).map((i: { candidate_id: string }) => i.candidate_id);
-    if (memberIds.length === 0) continue;
+  // 2. Batch-load all cluster_items (1 query)
+  const { data: allItems } = await supabase
+    .from("cluster_items")
+    .select("cluster_id, candidate_id")
+    .in("cluster_id", clusterIds);
 
+  const itemsByCluster = new Map<string, string[]>();
+  for (const item of allItems ?? []) {
+    const list = itemsByCluster.get(item.cluster_id) ?? [];
+    list.push(item.candidate_id);
+    itemsByCluster.set(item.cluster_id, list);
+  }
+
+  // 3. Batch-load all candidate content (1 query)
+  const allCandidateIds = [...new Set([...(allItems ?? []).map((i) => i.candidate_id)])];
+  const candidateMap = new Map<string, Pick<EventCandidate, "title" | "snippet" | "actors" | "source_domain">>();
+
+  if (allCandidateIds.length > 0) {
     const { data: members } = await supabase
       .from("event_candidates")
-      .select("title, snippet, actors, source_domain")
-      .in("id", memberIds);
+      .select("id, title, snippet, actors, source_domain")
+      .in("id", allCandidateIds);
 
-    if (!members || members.length === 0) continue;
+    for (const m of members ?? []) {
+      candidateMap.set(m.id, {
+        title: m.title,
+        snippet: m.snippet,
+        actors: m.actors,
+        source_domain: m.source_domain,
+      });
+    }
+  }
 
-    const typedMembers = members as Pick<EventCandidate, "title" | "snippet" | "actors" | "source_domain">[];
+  // 4. Build updates in-memory
+  const updates: {
+    id: string;
+    headline: string;
+    summary_know: string[];
+    summary_unclear: string[];
+    summary_why: string;
+  }[] = [];
+
+  for (const cluster of clusterList) {
+    const memberIds = itemsByCluster.get(cluster.id) ?? [];
+    if (memberIds.length === 0) continue;
+
+    const typedMembers = memberIds
+      .map((id) => candidateMap.get(id))
+      .filter(Boolean) as Pick<EventCandidate, "title" | "snippet" | "actors" | "source_domain">[];
+
+    if (typedMembers.length === 0) continue;
+
     const titles = typedMembers.map((m) => m.title);
     const snippets = typedMembers.map((m) => m.snippet).filter(Boolean) as string[];
 
     // ── Headline ──────────────────────────────────────────────────────────────
     const bigram = topBigram(titles);
-    let headline = cluster.headline; // default: first title
+    let headline = cluster.headline;
 
     if (bigram) {
-      // Find shortest title containing the top bigram
       const matching = titles.filter((t) => t.toLowerCase().includes(bigram));
       if (matching.length > 0) {
         const shortest = matching.sort((a, b) => a.length - b.length)[0];
@@ -94,7 +132,6 @@ export async function summarizeAllClusters(): Promise<void> {
       }
     }
 
-    // Fallback if no snippets
     if (knowBullets.length === 0 && titles.length > 0) {
       knowBullets.push(`Reports indicate that ${titles[0].toLowerCase()}`);
     }
@@ -119,14 +156,17 @@ export async function summarizeAllClusters(): Promise<void> {
     // ── Why bullet ────────────────────────────────────────────────────────────
     const why = WHY_MAP[cluster.category] ?? WHY_MAP.other;
 
-    await supabase
-      .from("clusters")
-      .update({
-        headline,
-        summary_know: knowBullets,
-        summary_unclear: unclearBullets.slice(0, 2),
-        summary_why: why,
-      })
-      .eq("id", cluster.id);
+    updates.push({
+      id: cluster.id,
+      headline,
+      summary_know: knowBullets,
+      summary_unclear: unclearBullets.slice(0, 2),
+      summary_why: why,
+    });
+  }
+
+  // 5. Batch upsert all summaries (1 query)
+  if (updates.length > 0) {
+    await supabase.from("clusters").upsert(updates, { onConflict: "id" });
   }
 }

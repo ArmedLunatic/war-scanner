@@ -1,5 +1,5 @@
 import { getServerClient } from "@/lib/supabase";
-import { CATEGORY_KEYWORDS, ACTOR_DICT } from "@/lib/constants";
+import { CATEGORY_KEYWORDS, ACTOR_DICT, INGEST_WINDOW_HOURS } from "@/lib/constants";
 import { extractKeywords, extractActors } from "@/lib/utils/text";
 import type { RawItem } from "@/lib/types";
 
@@ -16,10 +16,15 @@ function classifyCategory(text: string): string {
 export async function normalizeNewItems(): Promise<number> {
   const supabase = getServerClient();
 
-  // Find raw_items that don't yet have an event_candidate
+  // Find raw_items within the ingest window that don't yet have an event_candidate
+  const windowStart = new Date(
+    Date.now() - INGEST_WINDOW_HOURS * 3600 * 1000,
+  ).toISOString();
+
   const { data: rawItems, error } = await supabase
     .from("raw_items")
     .select("*")
+    .gte("fetched_at", windowStart)
     .order("fetched_at", { ascending: false })
     .limit(500);
 

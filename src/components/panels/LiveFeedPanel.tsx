@@ -33,6 +33,7 @@ function timeAgo(iso: string) {
 export function LiveFeedPanel() {
   const [clusters, setClusters] = useState<ClusterCard[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [lastFetch, setLastFetch] = useState(0);
   const [realtimeConnected, setRealtimeConnected] = useState(false);
   const [newCount, setNewCount] = useState(0);
@@ -44,15 +45,19 @@ export function LiveFeedPanel() {
           ? window.location.origin
           : "http://localhost:3000";
       const res = await fetch(
-        `${base}/api/events?limit=15&country=Israel,Iran,Lebanon,Gaza,Yemen`,
-        { cache: "no-store" }
+        `${base}/api/events?limit=15`,
+        { cache: "no-store", signal: AbortSignal.timeout(10_000) }
       );
-      if (!res.ok) return;
+      if (!res.ok) {
+        setError(true);
+        return;
+      }
       const data: FeedResponse = await res.json();
       setClusters(data.clusters);
+      setError(false);
       setLastFetch(Date.now());
     } catch {
-      // noop
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -136,7 +141,7 @@ export function LiveFeedPanel() {
   );
 
   return (
-    <PanelShell id="live" title={title as any} icon="📡">
+    <PanelShell id="live" title={title} icon="📡">
       {loading ? (
         <div
           style={{
@@ -149,6 +154,46 @@ export function LiveFeedPanel() {
           }}
         >
           LOADING...
+        </div>
+      ) : error ? (
+        <div
+          style={{
+            padding: "20px 16px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              letterSpacing: "0.12em",
+              color: "#e03e3e",
+              textTransform: "uppercase",
+              textAlign: "center",
+            }}
+          >
+            DATA UNAVAILABLE — SOURCE OFFLINE
+          </div>
+          <button
+            onClick={() => { setLoading(true); fetchFeed(); }}
+            style={{
+              background: "rgba(224,62,62,0.08)",
+              border: "1px solid rgba(224,62,62,0.25)",
+              borderRadius: "3px",
+              cursor: "pointer",
+              padding: "6px 16px",
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              letterSpacing: "0.1em",
+              color: "#e03e3e",
+              textTransform: "uppercase",
+            }}
+          >
+            ↻ Retry
+          </button>
         </div>
       ) : clusters.length === 0 ? (
         <div
