@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { PanelProvider } from "@/lib/context/PanelContext";
 import { OverlayNav } from "@/components/nav/OverlayNav";
+import { CommandPalette } from "@/components/CommandPalette";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
       >
         <PanelProvider>
           <OverlayNav />
+          <CommandPalette />
           {children}
         </PanelProvider>
       </body>

@@ -35,12 +35,32 @@ export default function ConflictGlobe({
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // Set initial POV after mount
+  // Set initial POV after mount + handle pending fly-to from command palette
   useEffect(() => {
-    if (globeRef.current) {
+    if (!globeRef.current) return;
+    const pending = sessionStorage.getItem("warspy:flyto");
+    if (pending) {
+      sessionStorage.removeItem("warspy:flyto");
+      setTimeout(() => globeRef.current?.pointOfView(JSON.parse(pending), 900), 600);
+    } else {
       globeRef.current.pointOfView(initialPov, 1200);
     }
   }, [initialPov]);
+
+  // Listen for real-time fly-to events (command palette when globe already mounted)
+  useEffect(() => {
+    function handleFlyTo(e: Event) {
+      const detail = (e as CustomEvent<{ lat: number; lng: number; altitude: number }>).detail;
+      globeRef.current?.pointOfView(detail, 800);
+      const controls = globeRef.current?.controls();
+      if (controls) {
+        controls.autoRotate = false;
+        setTimeout(() => { if (controls) controls.autoRotate = true; }, 5000);
+      }
+    }
+    window.addEventListener("warspy:flyto", handleFlyTo);
+    return () => window.removeEventListener("warspy:flyto", handleFlyTo);
+  }, []);
 
   // Controls setup
   useEffect(() => {

@@ -168,6 +168,26 @@ export function OverlayNav() {
             );
           })}
 
+          {/* ⌘K hint — desktop only */}
+          <button
+            className="desktop-only"
+            onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }))}
+            title="Command Palette"
+            style={{
+              background: "rgba(30,42,56,0.3)",
+              border: "1px solid rgba(30,42,56,0.7)",
+              borderRadius: "3px",
+              cursor: "pointer",
+              padding: "4px 8px",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              minHeight: "36px",
+            }}
+          >
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#3d4f63", letterSpacing: "0.08em" }}>⌘K</span>
+          </button>
+
           {/* Mobile hamburger */}
           <button
             className="mobile-only"
