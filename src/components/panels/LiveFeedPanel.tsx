@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { PanelShell } from "./PanelShell";
+import { Tooltip } from "@/components/Tooltip";
 import type { FeedResponse, ClusterCard } from "@/lib/types";
 
 const REFRESH_MS = 3 * 60 * 1000;
@@ -303,16 +304,18 @@ export function LiveFeedPanel() {
                       {c.country}
                     </span>
                   )}
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "9px",
-                      color: confidenceColor(c.confidence),
-                      letterSpacing: "0.04em",
-                    }}
-                  >
-                    {c.confidence}
-                  </span>
+                  <Tooltip text="Source reliability — based on corroboration across multiple feeds">
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "9px",
+                        color: confidenceColor(c.confidence),
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      {c.confidence}
+                    </span>
+                  </Tooltip>
                   <span
                     style={{
                       fontFamily: "var(--font-mono)",

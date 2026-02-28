@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Tooltip } from "@/components/Tooltip";
 
 export const metadata: Metadata = {
   title: "Nuclear Status — Warspy",
@@ -183,7 +184,11 @@ export default function NuclearPage() {
               textTransform: "uppercase",
             }}
           >
-            Uranium-235 Enrichment Level
+            Uranium-235{" "}
+            <Tooltip text="Process of increasing uranium-235 concentration — 3.67% reactor grade, 90%+ weapons grade">
+              <span style={{ borderBottom: "1px dotted var(--text-muted)", cursor: "help" }}>Enrichment</span>
+            </Tooltip>{" "}
+            Level
           </div>
 
           {/* Threshold labels */}
@@ -333,7 +338,10 @@ export default function NuclearPage() {
                   marginTop: "3px",
                 }}
               >
-                30 percentage points from weapons grade · Est. 1–2 weeks to breakout
+                30 percentage points from weapons grade · Est. 1–2 weeks to{" "}
+                <Tooltip text="Estimated time to produce enough weapons-grade uranium for one nuclear weapon">
+                  <span style={{ borderBottom: "1px dotted var(--text-muted)", cursor: "help" }}>breakout</span>
+                </Tooltip>
               </div>
             </div>
             <div

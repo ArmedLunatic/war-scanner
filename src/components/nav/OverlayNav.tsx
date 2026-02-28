@@ -10,6 +10,7 @@ import {
   WARSPY_TICKER,
   WARSPY_X_COMMUNITY_URL,
 } from "@/config";
+import { Tooltip } from "@/components/Tooltip";
 
 // ─── THREATCON Meter ─────────────────────────────────────────────────────────
 const THREATCON_LABELS = ["", "ALPHA", "BRAVO", "CHARLIE", "DELTA", "ECHO"];
@@ -43,45 +44,46 @@ function ThreatconMeter() {
   const color = THREATCON_COLORS[level];
 
   return (
-    <div
-      className="desktop-only"
-      title={`THREATCON ${THREATCON_LABELS[level]} — Level ${level}/5`}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "6px",
-        background: "rgba(10,14,20,0.6)",
-        border: `1px solid ${color}33`,
-        borderRadius: "3px",
-        padding: "3px 8px",
-        cursor: "default",
-      }}
-    >
-      {/* 5 bars */}
-      <div style={{ display: "flex", gap: "2px", alignItems: "flex-end" }}>
-        {[1, 2, 3, 4, 5].map((l) => (
-          <div
-            key={l}
-            style={{
-              width: "3px",
-              height: `${6 + l * 2}px`,
-              borderRadius: "1px",
-              background: l <= level ? color : "rgba(30,42,56,0.8)",
-              transition: "background 0.3s",
-              boxShadow: l <= level && l === level ? `0 0 4px ${color}` : "none",
-            }}
-          />
-        ))}
-      </div>
-      <div>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "7px", color: "#2d3f54", letterSpacing: "0.1em" }}>
-          THREATCON
+    <Tooltip text="Threat Condition — composite score based on event frequency and severity over 7 days">
+      <div
+        className="desktop-only"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          background: "rgba(10,14,20,0.6)",
+          border: `1px solid ${color}33`,
+          borderRadius: "3px",
+          padding: "3px 8px",
+          cursor: "default",
+        }}
+      >
+        {/* 5 bars */}
+        <div style={{ display: "flex", gap: "2px", alignItems: "flex-end" }}>
+          {[1, 2, 3, 4, 5].map((l) => (
+            <div
+              key={l}
+              style={{
+                width: "3px",
+                height: `${6 + l * 2}px`,
+                borderRadius: "1px",
+                background: l <= level ? color : "rgba(30,42,56,0.8)",
+                transition: "background 0.3s",
+                boxShadow: l <= level && l === level ? `0 0 4px ${color}` : "none",
+              }}
+            />
+          ))}
         </div>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "8px", fontWeight: 700, color, letterSpacing: "0.08em", lineHeight: 1 }}>
-          {THREATCON_LABELS[level]}
+        <div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "7px", color: "#2d3f54", letterSpacing: "0.1em" }}>
+            THREATCON
+          </div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "8px", fontWeight: 700, color, letterSpacing: "0.08em", lineHeight: 1 }}>
+            {THREATCON_LABELS[level]}
+          </div>
         </div>
       </div>
-    </div>
+    </Tooltip>
   );
 }
 
