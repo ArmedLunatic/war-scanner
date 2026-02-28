@@ -22,10 +22,12 @@ export function StatusBar() {
   if (!status) return null;
 
   return (
+    // Hidden on mobile — it clutters small screens
     <div
+      className="desktop-only"
       style={{
         position: "fixed",
-        bottom: "62px", // above timeline
+        bottom: "62px",
         right: "1.5rem",
         zIndex: 150,
         display: "flex",
@@ -35,7 +37,7 @@ export function StatusBar() {
         fontSize: "9px",
         letterSpacing: "0.08em",
         color: "#3d4f63",
-        background: "rgba(3,5,8,0.7)",
+        background: "rgba(3,5,8,0.75)",
         border: "1px solid rgba(30,42,56,0.6)",
         borderRadius: "3px",
         padding: "4px 8px",

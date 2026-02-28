@@ -23,13 +23,15 @@ export default function ConflictGlobe({
   const [hovered, setHovered] = useState<GlobeMarker | null>(null);
   const [dimensions, setDimensions] = useState({ w: 0, h: 0 });
 
+  const isMobile = dimensions.w > 0 && dimensions.w < 769;
+
   // Responsive sizing
   useEffect(() => {
     function update() {
       setDimensions({ w: window.innerWidth, h: window.innerHeight });
     }
     update();
-    window.addEventListener("resize", update);
+    window.addEventListener("resize", update, { passive: true });
     return () => window.removeEventListener("resize", update);
   }, []);
 
@@ -40,30 +42,25 @@ export default function ConflictGlobe({
     }
   }, [initialPov]);
 
-  // Auto-rotate, pause on hover
+  // Controls setup
   useEffect(() => {
-    if (!globeRef.current) return;
+    if (!globeRef.current || dimensions.w === 0) return;
     const controls = globeRef.current.controls();
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.2;
+    controls.autoRotateSpeed = isMobile ? 0.3 : 0.2;
     controls.enableZoom = true;
-    controls.minDistance = 150;
-    controls.maxDistance = 900;
-  }, [dimensions]); // re-run after mount
+    controls.minDistance = isMobile ? 200 : 150;
+    controls.maxDistance = isMobile ? 700 : 900;
+    controls.enablePan = false; // prevents accidental globe panning on mobile
+  }, [dimensions, isMobile]);
 
-  // Load country polygons lazily
+  // Lazy-load country polygons
   useEffect(() => {
-    fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")
-      .then((r) => r.json())
-      .then((world) => {
-        // world-atlas topojson → we need topojson-client, so use fetch for geojson instead
-        return fetch(
-          "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson"
-        );
-      })
+    fetch(
+      "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson"
+    )
       .then((r) => r.json())
       .then((geoJson) => {
-        // Filter to only our highlighted countries by ISO_N3
         const filtered = geoJson.features.filter((f: any) => {
           const iso = parseInt(f.properties?.ISO_N3 ?? "0", 10);
           return HIGHLIGHT_COUNTRY_IDS.has(iso);
@@ -75,14 +72,11 @@ export default function ConflictGlobe({
       });
   }, []);
 
-  const handleMouseOver = useCallback(
-    (obj: object | null) => {
-      const controls = globeRef.current?.controls();
-      if (controls) controls.autoRotate = !obj;
-      setHovered(obj as GlobeMarker | null);
-    },
-    []
-  );
+  const handleMouseOver = useCallback((obj: object | null) => {
+    const controls = globeRef.current?.controls();
+    if (controls) controls.autoRotate = !obj;
+    setHovered(obj as GlobeMarker | null);
+  }, []);
 
   const handleMarkerClick = useCallback(
     (obj: object) => {
@@ -99,7 +93,7 @@ export default function ConflictGlobe({
   if (dimensions.w === 0) return null;
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", touchAction: "none" }}>
       <Globe
         ref={globeRef}
         width={dimensions.w}
@@ -113,10 +107,10 @@ export default function ConflictGlobe({
         polygonsData={polygons}
         polygonCapColor={(feat: any) => {
           const iso = parseInt(feat.properties?.ISO_N3 ?? "0", 10);
-          if (iso === 376) return "rgba(96,165,250,0.12)"; // Israel — blue
-          if (iso === 364) return "rgba(224,62,62,0.12)"; // Iran — red
-          if (iso === 422) return "rgba(217,119,6,0.10)"; // Lebanon — amber
-          if (iso === 887) return "rgba(251,191,36,0.08)"; // Yemen — gold
+          if (iso === 376) return "rgba(96,165,250,0.12)";
+          if (iso === 364) return "rgba(224,62,62,0.12)";
+          if (iso === 422) return "rgba(217,119,6,0.10)";
+          if (iso === 887) return "rgba(251,191,36,0.08)";
           return "rgba(167,139,250,0.06)";
         }}
         polygonSideColor={() => "rgba(0,0,0,0)"}
@@ -133,7 +127,7 @@ export default function ConflictGlobe({
         pointLat="lat"
         pointLng="lng"
         pointColor="color"
-        pointRadius="radius"
+        pointRadius={isMobile ? "radius" : "radius"}
         pointAltitude="altitude"
         pointLabel={(obj: any) =>
           `<div class="globe-tooltip"><strong>${obj.label}</strong><br/>${obj.subLabel}</div>`
@@ -152,16 +146,16 @@ export default function ConflictGlobe({
         arcDashGap="dashGap"
         arcDashAnimateTime="animateTime"
         arcAltitude={0.15}
-        arcStroke={0.4}
+        arcStroke={isMobile ? 0.3 : 0.4}
         arcLabel={(obj: any) =>
           `<div class="globe-tooltip">${obj.label}</div>`
         }
-        // Renderer
-        rendererConfig={{ antialias: true, alpha: false }}
+        // Mobile: disable antialias for better performance
+        rendererConfig={{ antialias: !isMobile, alpha: false }}
       />
 
-      {/* Hover tooltip overlay */}
-      {hovered && (
+      {/* Hover tooltip — desktop only */}
+      {hovered && !isMobile && (
         <div
           style={{
             position: "absolute",

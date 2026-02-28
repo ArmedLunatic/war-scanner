@@ -29,7 +29,7 @@ export default async function EventDetailPage({ params }: PageProps) {
   if (!cluster) notFound();
 
   return (
-    <div style={{ maxWidth: "48rem", margin: "0 auto" }}>
+    <div style={{ maxWidth: "48rem", margin: "0 auto", padding: "80px 1.5rem 3rem" }}>
       {/* Breadcrumb */}
       <div style={{ marginBottom: "1.5rem" }}>
         <Link

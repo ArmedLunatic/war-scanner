@@ -8,18 +8,32 @@ interface PanelContextValue {
   toggle: (id: PanelId) => void;
   isOpen: (id: PanelId) => boolean;
   close: (id: PanelId) => void;
+  closeAll: () => void;
 }
 
 const PanelContext = createContext<PanelContextValue | null>(null);
 
+function isMobileWidth() {
+  return typeof window !== "undefined" && window.innerWidth < 769;
+}
+
 export function PanelProvider({ children }: { children: React.ReactNode }) {
-  const [openPanels, setOpenPanels] = useState<Set<PanelId>>(new Set(["live"]));
+  // On mobile: start with no panels open (globe loads clean)
+  // On desktop: start with live panel open
+  const [openPanels, setOpenPanels] = useState<Set<PanelId>>(
+    () => new Set(isMobileWidth() ? [] : ["live"])
+  );
 
   const toggle = useCallback((id: PanelId) => {
     setOpenPanels((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        // On mobile: only one panel at a time (bottom sheet UX)
+        if (isMobileWidth()) next.clear();
+        next.add(id);
+      }
       return next;
     });
   }, []);
@@ -34,8 +48,10 @@ export function PanelProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const closeAll = useCallback(() => setOpenPanels(new Set()), []);
+
   return (
-    <PanelContext.Provider value={{ openPanels, toggle, isOpen, close }}>
+    <PanelContext.Provider value={{ openPanels, toggle, isOpen, close, closeAll }}>
       {children}
     </PanelContext.Provider>
   );

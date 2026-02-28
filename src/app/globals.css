@@ -202,6 +202,82 @@ a {
   user-select: none;
 }
 
+/* ─── Touch & Mobile Base ────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Safe-area bottom padding for iPhone notch / home bar */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Bottom sheet drag handle */
+.sheet-handle {
+  width: 40px;
+  height: 3px;
+  background: rgba(96, 165, 250, 0.18);
+  border-radius: 2px;
+  margin: 10px auto 2px;
+  flex-shrink: 0;
+}
+
+/* Backdrop behind open panel on mobile */
+.panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 98;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+/* Mobile nav drawer */
+.mobile-menu-drawer {
+  position: fixed;
+  top: 48px;
+  left: 0;
+  right: 0;
+  z-index: 195;
+  background: rgba(3, 5, 8, 0.97);
+  border-bottom: 1px solid rgba(96, 165, 250, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 13px;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+
+  .panel-glass {
+    border-radius: 16px 16px 0 0 !important;
+  }
+
+  /* Increase tap targets on mobile */
+  .nav-link {
+    padding: 8px 0;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
 /* ─── Globe & Panel Styles ─────────────────────────────────────────────────── */
 
 .panel-glass {

@@ -26,7 +26,7 @@ export default async function BriefPage() {
   const brief = await getBrief(12);
 
   return (
-    <div style={{ maxWidth: "48rem", margin: "0 auto" }}>
+    <div style={{ maxWidth: "48rem", margin: "0 auto", padding: "80px 1.5rem 3rem" }}>
       {/* Header */}
       <div style={{ marginBottom: "2rem" }}>
         <h1

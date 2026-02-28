@@ -1,10 +1,7 @@
 "use client";
-import { useRef } from "react";
 import { CONFLICT_TIMELINE } from "@/lib/conflict/conflictTimeline";
 
 export function TimelinePanel() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
   return (
     <div
       style={{
@@ -13,26 +10,30 @@ export function TimelinePanel() {
         left: 0,
         right: 0,
         zIndex: 110,
-        background: "rgba(3,5,8,0.88)",
-        borderTop: "1px solid rgba(96,165,250,0.12)",
+        background: "rgba(3,5,8,0.90)",
+        borderTop: "1px solid rgba(96,165,250,0.1)",
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
+        // iOS safe area
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
-      {/* Label */}
+      {/* Label — desktop only */}
       <div
+        className="desktop-only"
         style={{
           position: "absolute",
           left: "1rem",
           top: "50%",
           transform: "translateY(-50%)",
           fontFamily: "var(--font-mono)",
-          fontSize: "9px",
-          letterSpacing: "0.12em",
+          fontSize: "8px",
+          letterSpacing: "0.14em",
           textTransform: "uppercase",
           color: "#3d4f63",
           userSelect: "none",
           zIndex: 1,
+          pointerEvents: "none",
         }}
       >
         Timeline
@@ -40,17 +41,18 @@ export function TimelinePanel() {
 
       {/* Scrollable events */}
       <div
-        ref={scrollRef}
         style={{
           overflowX: "auto",
           overflowY: "hidden",
-          padding: "8px 7rem 8px 6rem",
+          padding: "6px 1rem 6px 5.5rem",
           display: "flex",
           alignItems: "center",
           gap: "0",
           scrollbarWidth: "none",
           msOverflowStyle: "none",
-          height: "56px",
+          height: "52px",
+          scrollSnapType: "x mandatory",
+          WebkitOverflowScrolling: "touch" as any,
         }}
       >
         {CONFLICT_TIMELINE.map((event, i) => (
@@ -62,9 +64,9 @@ export function TimelinePanel() {
             {i > 0 && (
               <div
                 style={{
-                  width: "32px",
+                  width: "28px",
                   height: "1px",
-                  background: "rgba(30,42,56,0.8)",
+                  background: "rgba(30,42,56,0.9)",
                   flexShrink: 0,
                 }}
               />
@@ -76,10 +78,11 @@ export function TimelinePanel() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: "3px",
-                cursor: "default",
+                gap: "2px",
                 flexShrink: 0,
-                maxWidth: "90px",
+                width: "76px",
+                scrollSnapAlign: "center",
+                padding: "0 4px",
               }}
               title={event.description}
             >
@@ -90,7 +93,7 @@ export function TimelinePanel() {
                   height: "7px",
                   borderRadius: "50%",
                   background: event.color,
-                  boxShadow: `0 0 6px ${event.color}88`,
+                  boxShadow: `0 0 5px ${event.color}88`,
                   flexShrink: 0,
                 }}
               />
@@ -102,7 +105,7 @@ export function TimelinePanel() {
                   fontSize: "8px",
                   color: event.color,
                   letterSpacing: "0.04em",
-                  opacity: 0.8,
+                  opacity: 0.85,
                   lineHeight: 1,
                 }}
               >
@@ -113,15 +116,15 @@ export function TimelinePanel() {
               <span
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: "8px",
+                  fontSize: "7px",
                   color: "#6b7a8d",
-                  letterSpacing: "0.02em",
+                  letterSpacing: "0.01em",
                   textAlign: "center",
                   lineHeight: 1.2,
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                  maxWidth: "88px",
+                  maxWidth: "72px",
                 }}
               >
                 {event.label}
@@ -130,6 +133,9 @@ export function TimelinePanel() {
           </div>
         ))}
       </div>
+
+      {/* Hide scrollbar via CSS */}
+      <style>{`.timeline-scroll::-webkit-scrollbar { display: none; }`}</style>
     </div>
   );
 }

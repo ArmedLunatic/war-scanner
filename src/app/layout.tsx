@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { PanelProvider } from "@/lib/context/PanelContext";
@@ -7,17 +7,26 @@ import { OverlayNav } from "@/components/nav/OverlayNav";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Warspy — Israel–Iran Conflict Monitor",
   description:
     "Real-time Israel–Iran conflict theater: interactive 3D globe, live event feed, social stream, and historical context. Powered by GDELT, ReliefWeb, RSS, and Reddit.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#030508",
 };
 
 export default function RootLayout({
