@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
 import type { GlobeArc } from "@/components/globe/globeData";
 
 const GlobeWrapper = dynamic(() => import("@/components/globe/GlobeWrapper"), {
@@ -146,6 +147,8 @@ export default function StrikesPage() {
   const [waveIdx, setWaveIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [controlExpanded, setControlExpanded] = useState(false);
 
   const strike = STRIKES[strikeIdx];
   const wave = strike.waves[waveIdx];
@@ -179,6 +182,13 @@ export default function StrikesPage() {
   useEffect(() => {
     document.body.classList.add("body-globe-mode");
     return () => document.body.classList.remove("body-globe-mode");
+  }, []);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 769);
+    check();
+    window.addEventListener("resize", check, { passive: true });
+    return () => window.removeEventListener("resize", check);
   }, []);
 
   return (
@@ -274,106 +284,210 @@ export default function StrikesPage() {
           borderTop: `1px solid ${strike.color}33`,
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
-          padding: "16px 20px 20px",
+          padding: isMobile ? "10px 16px 14px" : "16px 20px 20px",
         }}
       >
-        {/* Strike header */}
-        <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", marginBottom: "14px" }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-              <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: strike.color, boxShadow: `0 0 8px ${strike.color}`, animation: "pulse2 1.5s ease-in-out infinite" }} />
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "14px", fontWeight: 700, color: "#e2e8f0", letterSpacing: "0.04em" }}>
+        {isMobile && !controlExpanded ? (
+          /* ── Compact mobile strip ── */
+          <div
+            onClick={() => setControlExpanded(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              cursor: "pointer",
+            }}
+          >
+            <div style={{ flex: 1 }}>
+              <div style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "11px",
+                fontWeight: 700,
+                color: "#e2e8f0",
+                letterSpacing: "0.04em",
+              }}>
                 {strike.name}
-              </span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#3d4f63", letterSpacing: "0.08em" }}>
-                {strike.date}
-              </span>
-            </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#6b7a8d", letterSpacing: "0.02em" }}>
-              {strike.subtitle}
-            </div>
-          </div>
-
-          {/* Overall stats */}
-          <div style={{ display: "flex", gap: "12px", flexShrink: 0 }}>
-            {[
-              { label: "FIRED", value: totalProjectiles, color: strike.color },
-              { label: "INTERCEPTED", value: `${interceptPct}%`, color: "#22c55e" },
-            ].map((s) => (
-              <div key={s.label} style={{ textAlign: "right" }}>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "18px", fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</div>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "7px", color: "#2d3f54", letterSpacing: "0.1em", marginTop: "2px" }}>{s.label}</div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Wave timeline */}
-        <div style={{ display: "flex", gap: "6px", alignItems: "stretch", marginBottom: "14px" }}>
-          {strike.waves.map((w, i) => (
-            <button
-              key={w.id}
-              onClick={() => { setWaveIdx(i); setPlaying(false); }}
-              style={{
-                flex: 1,
-                background: i === waveIdx ? "rgba(30,42,56,0.8)" : "rgba(15,22,35,0.5)",
-                border: `1px solid ${i === waveIdx ? typeColor[w.type] + "44" : "rgba(30,42,56,0.6)"}`,
-                borderLeft: i === waveIdx ? `3px solid ${typeColor[w.type]}` : "3px solid transparent",
-                borderRadius: "3px",
-                cursor: "pointer",
-                padding: "8px 10px",
-                textAlign: "left",
-                transition: "all 0.15s",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px" }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "8px", color: typeColor[w.type], letterSpacing: "0.08em", fontWeight: 700 }}>
-                  {typeLabel[w.type]}
-                </span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "7px", color: "#2d3f54" }}>{w.time}</span>
+              <div style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "9px",
+                color: typeColor[wave.type],
+                letterSpacing: "0.06em",
+              }}>
+                Wave {waveIdx + 1}/{strike.waves.length} · {typeLabel[wave.type]}
               </div>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: i === waveIdx ? "#94a3b8" : "#3d4f63" }}>
-                {w.count} launched · {w.intercepted} intercepted
+            </div>
+            <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+              <button
+                onClick={(e) => { e.stopPropagation(); setWaveIdx(Math.max(0, waveIdx - 1)); }}
+                disabled={waveIdx === 0}
+                style={{
+                  background: "rgba(30,42,56,0.6)",
+                  border: "1px solid rgba(30,42,56,0.8)",
+                  borderRadius: "3px",
+                  cursor: waveIdx === 0 ? "not-allowed" : "pointer",
+                  color: waveIdx === 0 ? "#2d3f54" : "#6b7a8d",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "11px",
+                  padding: "6px 8px",
+                  minWidth: "32px",
+                  minHeight: "32px",
+                }}
+              >‹</button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setPlaying((v) => !v); }}
+                style={{
+                  background: playing ? "rgba(224,62,62,0.1)" : "rgba(30,42,56,0.6)",
+                  border: `1px solid ${playing ? "rgba(224,62,62,0.3)" : "rgba(30,42,56,0.8)"}`,
+                  borderRadius: "3px",
+                  cursor: "pointer",
+                  color: playing ? "#e03e3e" : "#94a3b8",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "11px",
+                  padding: "6px 10px",
+                  minHeight: "32px",
+                }}
+              >{playing ? "⏸" : "▶"}</button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setWaveIdx(Math.min(strike.waves.length - 1, waveIdx + 1)); }}
+                disabled={waveIdx === strike.waves.length - 1}
+                style={{
+                  background: "rgba(30,42,56,0.6)",
+                  border: "1px solid rgba(30,42,56,0.8)",
+                  borderRadius: "3px",
+                  cursor: waveIdx === strike.waves.length - 1 ? "not-allowed" : "pointer",
+                  color: waveIdx === strike.waves.length - 1 ? "#2d3f54" : "#6b7a8d",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "11px",
+                  padding: "6px 8px",
+                  minWidth: "32px",
+                  minHeight: "32px",
+                }}
+              >›</button>
+            </div>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "8px", color: "#3d4f63" }}>▲</span>
+          </div>
+        ) : (
+          /* ── Full control bar (desktop always, mobile when expanded) ── */
+          <div style={{ position: "relative" }}>
+            {isMobile && (
+              <button
+                onClick={() => setControlExpanded(false)}
+                style={{
+                  position: "absolute",
+                  top: "0px",
+                  right: "0px",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "#3d4f63",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "9px",
+                  padding: "4px 8px",
+                  zIndex: 1,
+                }}
+              >▼ COLLAPSE</button>
+            )}
+
+            {/* Strike header */}
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", marginBottom: "14px" }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                  <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: strike.color, boxShadow: `0 0 8px ${strike.color}`, animation: "pulse2 1.5s ease-in-out infinite" }} />
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "14px", fontWeight: 700, color: "#e2e8f0", letterSpacing: "0.04em" }}>
+                    {strike.name}
+                  </span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#3d4f63", letterSpacing: "0.08em" }}>
+                    {strike.date}
+                  </span>
+                </div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#6b7a8d", letterSpacing: "0.02em" }}>
+                  {strike.subtitle}
+                </div>
               </div>
-            </button>
-          ))}
-        </div>
 
-        {/* Current wave detail */}
-        <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", fontWeight: 700, color: typeColor[wave.type], letterSpacing: "0.06em", marginBottom: "4px" }}>
-              {wave.label}
+              {/* Overall stats */}
+              <div style={{ display: "flex", gap: "12px", flexShrink: 0 }}>
+                {[
+                  { label: "FIRED", value: totalProjectiles, color: strike.color },
+                  { label: "INTERCEPTED", value: `${interceptPct}%`, color: "#22c55e" },
+                ].map((s) => (
+                  <div key={s.label} style={{ textAlign: "right" }}>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "18px", fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</div>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "7px", color: "#2d3f54", letterSpacing: "0.1em", marginTop: "2px" }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#6b7a8d", lineHeight: 1.6, letterSpacing: "0.01em" }}>
-              {wave.description}
+
+            {/* Wave timeline */}
+            <div style={{ display: "flex", gap: "6px", alignItems: "stretch", marginBottom: "14px" }}>
+              {strike.waves.map((w, i) => (
+                <button
+                  key={w.id}
+                  onClick={() => { setWaveIdx(i); setPlaying(false); }}
+                  style={{
+                    flex: 1,
+                    background: i === waveIdx ? "rgba(30,42,56,0.8)" : "rgba(15,22,35,0.5)",
+                    border: `1px solid ${i === waveIdx ? typeColor[w.type] + "44" : "rgba(30,42,56,0.6)"}`,
+                    borderLeft: i === waveIdx ? `3px solid ${typeColor[w.type]}` : "3px solid transparent",
+                    borderRadius: "3px",
+                    cursor: "pointer",
+                    padding: "8px 10px",
+                    textAlign: "left",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px" }}>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "8px", color: typeColor[w.type], letterSpacing: "0.08em", fontWeight: 700 }}>
+                      {typeLabel[w.type]}
+                    </span>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "7px", color: "#2d3f54" }}>{w.time}</span>
+                  </div>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: i === waveIdx ? "#94a3b8" : "#3d4f63" }}>
+                    {w.count} launched · {w.intercepted} intercepted
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Current wave detail */}
+            <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", fontWeight: 700, color: typeColor[wave.type], letterSpacing: "0.06em", marginBottom: "4px" }}>
+                  {wave.label}
+                </div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#6b7a8d", lineHeight: 1.6, letterSpacing: "0.01em" }}>
+                  {wave.description}
+                </div>
+              </div>
+
+              {/* Playback controls */}
+              <div style={{ display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 }}>
+                <button
+                  onClick={() => setWaveIdx(Math.max(0, waveIdx - 1))}
+                  disabled={waveIdx === 0}
+                  style={{ background: "rgba(30,42,56,0.6)", border: "1px solid rgba(30,42,56,0.8)", borderRadius: "3px", cursor: waveIdx === 0 ? "not-allowed" : "pointer", color: waveIdx === 0 ? "#2d3f54" : "#6b7a8d", fontFamily: "var(--font-mono)", fontSize: "11px", padding: "6px 10px", minWidth: "36px", minHeight: "36px" }}
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={() => setPlaying((v) => !v)}
+                  style={{ background: playing ? "rgba(224,62,62,0.1)" : "rgba(30,42,56,0.6)", border: `1px solid ${playing ? "rgba(224,62,62,0.3)" : "rgba(30,42,56,0.8)"}`, borderRadius: "3px", cursor: "pointer", color: playing ? "#e03e3e" : "#94a3b8", fontFamily: "var(--font-mono)", fontSize: "11px", padding: "6px 14px", minHeight: "36px" }}
+                >
+                  {playing ? "⏸ PAUSE" : "▶ PLAY"}
+                </button>
+                <button
+                  onClick={() => setWaveIdx(Math.min(strike.waves.length - 1, waveIdx + 1))}
+                  disabled={waveIdx === strike.waves.length - 1}
+                  style={{ background: "rgba(30,42,56,0.6)", border: "1px solid rgba(30,42,56,0.8)", borderRadius: "3px", cursor: waveIdx === strike.waves.length - 1 ? "not-allowed" : "pointer", color: waveIdx === strike.waves.length - 1 ? "#2d3f54" : "#6b7a8d", fontFamily: "var(--font-mono)", fontSize: "11px", padding: "6px 10px", minWidth: "36px", minHeight: "36px" }}
+                >
+                  ›
+                </button>
+              </div>
             </div>
           </div>
-
-          {/* Playback controls */}
-          <div style={{ display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 }}>
-            <button
-              onClick={() => setWaveIdx(Math.max(0, waveIdx - 1))}
-              disabled={waveIdx === 0}
-              style={{ background: "rgba(30,42,56,0.6)", border: "1px solid rgba(30,42,56,0.8)", borderRadius: "3px", cursor: waveIdx === 0 ? "not-allowed" : "pointer", color: waveIdx === 0 ? "#2d3f54" : "#6b7a8d", fontFamily: "var(--font-mono)", fontSize: "11px", padding: "6px 10px", minWidth: "36px", minHeight: "36px" }}
-            >
-              ‹
-            </button>
-            <button
-              onClick={() => setPlaying((v) => !v)}
-              style={{ background: playing ? "rgba(224,62,62,0.1)" : "rgba(30,42,56,0.6)", border: `1px solid ${playing ? "rgba(224,62,62,0.3)" : "rgba(30,42,56,0.8)"}`, borderRadius: "3px", cursor: "pointer", color: playing ? "#e03e3e" : "#94a3b8", fontFamily: "var(--font-mono)", fontSize: "11px", padding: "6px 14px", minHeight: "36px" }}
-            >
-              {playing ? "⏸ PAUSE" : "▶ PLAY"}
-            </button>
-            <button
-              onClick={() => setWaveIdx(Math.min(strike.waves.length - 1, waveIdx + 1))}
-              disabled={waveIdx === strike.waves.length - 1}
-              style={{ background: "rgba(30,42,56,0.6)", border: "1px solid rgba(30,42,56,0.8)", borderRadius: "3px", cursor: waveIdx === strike.waves.length - 1 ? "not-allowed" : "pointer", color: waveIdx === strike.waves.length - 1 ? "#2d3f54" : "#6b7a8d", fontFamily: "var(--font-mono)", fontSize: "11px", padding: "6px 10px", minWidth: "36px", minHeight: "36px" }}
-            >
-              ›
-            </button>
-          </div>
-        </div>
+        )}
       </div>
     </>
   );
