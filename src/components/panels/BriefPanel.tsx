@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { PanelShell } from "./PanelShell";
+import { PanelSkeleton } from "./PanelSkeleton";
 import type { ClusterCard } from "@/lib/types";
 
 interface BriefItem {
@@ -66,18 +67,7 @@ export function BriefPanel() {
   return (
     <PanelShell id="brief" title="Intelligence Brief" icon="📋">
       {loading ? (
-        <div
-          style={{
-            padding: "24px",
-            textAlign: "center",
-            fontFamily: "var(--font-mono)",
-            fontSize: "10px",
-            color: "#3d4f63",
-            letterSpacing: "0.1em",
-          }}
-        >
-          LOADING...
-        </div>
+        <PanelSkeleton />
       ) : error ? (
         <div
           style={{

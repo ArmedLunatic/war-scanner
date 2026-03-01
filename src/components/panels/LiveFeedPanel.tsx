@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { PanelShell } from "./PanelShell";
+import { PanelSkeleton } from "./PanelSkeleton";
 import { Tooltip } from "@/components/Tooltip";
 import type { FeedResponse, ClusterCard } from "@/lib/types";
 import { timeAgo } from "@/lib/utils/timeAgo";
@@ -137,18 +138,7 @@ export function LiveFeedPanel() {
   return (
     <PanelShell id="live" title={title} icon="📡">
       {loading ? (
-        <div
-          style={{
-            padding: "24px",
-            textAlign: "center",
-            fontFamily: "var(--font-mono)",
-            fontSize: "10px",
-            color: "#3d4f63",
-            letterSpacing: "0.1em",
-          }}
-        >
-          LOADING...
-        </div>
+        <PanelSkeleton />
       ) : error ? (
         <div
           style={{

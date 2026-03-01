@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { PanelShell } from "./PanelShell";
+import { PanelSkeleton } from "./PanelSkeleton";
 import type { SocialPost, SocialResponse } from "@/lib/types";
 import { timeAgo } from "@/lib/utils/timeAgo";
 
@@ -49,18 +50,7 @@ export function SocialFeedPanel() {
   return (
     <PanelShell id="social" title="Social Feed" icon="💬">
       {loading ? (
-        <div
-          style={{
-            padding: "24px",
-            textAlign: "center",
-            fontFamily: "var(--font-mono)",
-            fontSize: "10px",
-            color: "#3d4f63",
-            letterSpacing: "0.1em",
-          }}
-        >
-          LOADING...
-        </div>
+        <PanelSkeleton />
       ) : error ? (
         <div
           style={{

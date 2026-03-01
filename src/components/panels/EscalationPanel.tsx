@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { PanelShell } from "./PanelShell";
+import { PanelSkeleton } from "./PanelSkeleton";
 import { usePanels } from "@/lib/context/PanelContext";
 import type { EscalationPoint } from "@/app/api/escalation/route";
 
@@ -59,18 +60,7 @@ export function EscalationPanel() {
   return (
     <PanelShell id="escalation" title="Escalation Index" icon="📈" maxHeight="calc(60vh - 80px)">
       {loading ? (
-        <div
-          style={{
-            padding: "24px",
-            textAlign: "center",
-            fontFamily: "var(--font-mono)",
-            fontSize: "9px",
-            letterSpacing: "0.16em",
-            color: "#2d3f54",
-          }}
-        >
-          LOADING...
-        </div>
+        <PanelSkeleton rows={3} />
       ) : (
         <div style={{ padding: "12px 14px 14px" }}>
           {/* Score + trend */}
