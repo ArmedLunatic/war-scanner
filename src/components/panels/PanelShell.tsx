@@ -78,6 +78,7 @@ export function PanelShell({
                   display: "flex",
                   flexDirection: "column",
                   overflow: "hidden",
+                  pointerEvents: "auto" as const,
                   // iOS safe area
                   paddingBottom: "env(safe-area-inset-bottom, 0px)",
                 }
@@ -87,6 +88,7 @@ export function PanelShell({
                   display: "flex",
                   flexDirection: "column",
                   overflow: "hidden",
+                  pointerEvents: "auto" as const,
                   ...style,
                 }
           }

@@ -99,18 +99,18 @@ export default function GlobePage() {
       {/* Mobile backdrop — closes panel on tap outside */}
       <MobileBackdrop />
 
-      {/* ── Right side panels (desktop only) ── */}
+      {/* ── Right side panels ── */}
       <div
-        className="desktop-only"
         style={{
           position: "fixed",
           right: "1.5rem",
           top: "64px",
-          zIndex: "var(--panel-z)" as any,
+          zIndex: 100,
           display: "flex",
           flexDirection: "column",
           gap: "8px",
           maxHeight: "calc(100vh - 140px)",
+          pointerEvents: "none",
         }}
       >
         <LiveFeedPanel />
@@ -119,26 +119,17 @@ export default function GlobePage() {
         <EscalationPanel />
       </div>
 
-      {/* ── Left panel (desktop only) ── */}
+      {/* ── Left panel ── */}
       <div
-        className="desktop-only"
         style={{
           position: "fixed",
           left: "1.5rem",
           top: "64px",
-          zIndex: "var(--panel-z)" as any,
+          zIndex: 100,
+          pointerEvents: "none",
         }}
       >
         <ContextPanel />
-      </div>
-
-      {/* ── Mobile panels — bottom sheets rendered by PanelShell itself ── */}
-      <div className="mobile-only">
-        <LiveFeedPanel />
-        <SocialFeedPanel />
-        <BriefPanel />
-        <ContextPanel />
-        <EscalationPanel />
       </div>
 
       {/* ── Status bar (desktop only) ── */}
