@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { PanelShell } from "./PanelShell";
 import { Tooltip } from "@/components/Tooltip";
 import type { FeedResponse, ClusterCard } from "@/lib/types";
+import { timeAgo } from "@/lib/utils/timeAgo";
 
 const REFRESH_MS = 3 * 60 * 1000;
 const REALTIME_AVAILABLE =
@@ -21,14 +22,6 @@ function confidenceColor(c: string) {
   if (c === "HIGH") return "#22c55e";
   if (c === "MED") return "#d97706";
   return "#e03e3e";
-}
-
-function timeAgo(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const h = Math.floor(diff / 3600000);
-  if (h < 1) return `${Math.floor(diff / 60000)}m ago`;
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
 }
 
 export function LiveFeedPanel() {

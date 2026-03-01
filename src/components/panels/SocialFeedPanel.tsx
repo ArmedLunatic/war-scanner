@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { PanelShell } from "./PanelShell";
 import type { SocialPost, SocialResponse } from "@/lib/types";
+import { timeAgo } from "@/lib/utils/timeAgo";
 
 const REFRESH_MS = 15 * 60 * 1000;
 
@@ -11,14 +12,6 @@ const TYPE_COLORS: Record<string, string> = {
   news: "#22d3ee",
   twitter: "#94a3b8",
 };
-
-function timeAgo(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const h = Math.floor(diff / 3600000);
-  if (h < 1) return `${Math.floor(diff / 60000)}m ago`;
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
-}
 
 export function SocialFeedPanel() {
   const [posts, setPosts] = useState<SocialPost[]>([]);
