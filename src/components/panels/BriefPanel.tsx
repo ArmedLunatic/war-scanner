@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { IconBrief } from "@/components/icons";
 import { PanelShell } from "./PanelShell";
 import { PanelSkeleton } from "./PanelSkeleton";
 import type { ClusterCard } from "@/lib/types";
@@ -65,7 +66,7 @@ export function BriefPanel() {
   }, [fetchBrief]);
 
   return (
-    <PanelShell id="brief" title="Intelligence Brief" icon="📋">
+    <PanelShell id="brief" title="Intelligence Brief" icon={<IconBrief size={13} />}>
       {loading ? (
         <PanelSkeleton />
       ) : error ? (

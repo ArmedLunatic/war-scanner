@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { IconTrend } from "@/components/icons";
 import { PanelShell } from "./PanelShell";
 import { PanelSkeleton } from "./PanelSkeleton";
 import { usePanels } from "@/lib/context/PanelContext";
@@ -58,7 +59,7 @@ export function EscalationPanel() {
   });
 
   return (
-    <PanelShell id="escalation" title="Escalation Index" icon="📈" maxHeight="calc(60vh - 80px)">
+    <PanelShell id="escalation" title="Escalation Index" icon={<IconTrend size={13} />} maxHeight="calc(60vh - 80px)">
       {loading ? (
         <PanelSkeleton rows={3} />
       ) : (

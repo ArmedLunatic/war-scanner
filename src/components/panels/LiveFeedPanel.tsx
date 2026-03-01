@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { IconRadar } from "@/components/icons";
 import { PanelShell } from "./PanelShell";
 import { PanelSkeleton } from "./PanelSkeleton";
 import { Tooltip } from "@/components/Tooltip";
@@ -136,7 +137,7 @@ export function LiveFeedPanel() {
   );
 
   return (
-    <PanelShell id="live" title={title} icon="📡">
+    <PanelShell id="live" title={title} icon={<IconRadar size={13} />}>
       {loading ? (
         <PanelSkeleton />
       ) : error ? (

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { IconChat } from "@/components/icons";
 import { PanelShell } from "./PanelShell";
 import { PanelSkeleton } from "./PanelSkeleton";
 import type { SocialPost, SocialResponse } from "@/lib/types";
@@ -48,7 +49,7 @@ export function SocialFeedPanel() {
   }, [fetchSocial]);
 
   return (
-    <PanelShell id="social" title="Social Feed" icon="💬">
+    <PanelShell id="social" title="Social Feed" icon={<IconChat size={13} />}>
       {loading ? (
         <PanelSkeleton />
       ) : error ? (

@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState, type ReactNode } from "react";
 import type { PanelId } from "@/lib/context/PanelContext";
 import { usePanels } from "@/lib/context/PanelContext";
+import { IconClose } from "@/components/icons";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(
@@ -19,7 +20,7 @@ function useIsMobile() {
 interface Props {
   id: PanelId;
   title: ReactNode;
-  icon?: string;
+  icon?: ReactNode;
   width?: number;
   maxHeight?: string;
   children: ReactNode;
@@ -148,7 +149,7 @@ export function PanelShell({
               }
               aria-label="Close panel"
             >
-              ×
+              <IconClose size={14} />
             </button>
           </div>
 
