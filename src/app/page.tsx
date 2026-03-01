@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { AnimatePresence, motion } from "framer-motion";
 import { LiveFeedPanel } from "@/components/panels/LiveFeedPanel";
 import { SocialFeedPanel } from "@/components/panels/SocialFeedPanel";
 import { ContextPanel } from "@/components/panels/ContextPanel";
@@ -8,6 +9,7 @@ import { TimelinePanel } from "@/components/panels/TimelinePanel";
 import { BriefPanel } from "@/components/panels/BriefPanel";
 import { EscalationPanel } from "@/components/panels/EscalationPanel";
 import { StatusBar } from "@/components/nav/StatusBar";
+import { IconClose } from "@/components/icons";
 import { usePanels } from "@/lib/context/PanelContext";
 import type { GlobeMarker } from "@/components/globe/globeData";
 import WelcomeTour from "@/components/WelcomeTour";
@@ -139,73 +141,87 @@ export default function GlobePage() {
       <TimelinePanel />
 
       {/* ── Selected marker chip ── */}
-      {selectedMarker && (
-        <div
-          style={{
-            position: "fixed",
-            top: "64px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 150,
-            maxWidth: "calc(100vw - 2rem)",
-            width: "max-content",
-            background: "rgba(10,14,20,0.92)",
-            border: `1px solid ${selectedMarker.color}44`,
-            borderLeft: `3px solid ${selectedMarker.color}`,
-            borderRadius: "4px",
-            padding: "10px 16px",
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-          }}
-        >
-          <div>
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "12px",
-                fontWeight: 700,
-                color: selectedMarker.color,
-                letterSpacing: "0.04em",
-              }}
-            >
-              {selectedMarker.label}
-            </div>
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "10px",
-                color: "#6b7a8d",
-                marginTop: "2px",
-              }}
-            >
-              {selectedMarker.subLabel}
-            </div>
-          </div>
-          <button
-            onClick={() => setSelectedMarker(null)}
+      <AnimatePresence>
+        {selectedMarker && (
+          <div
+            key="marker-chip-wrap"
             style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "#3d4f63",
-              fontSize: "20px",
-              padding: 0,
-              minWidth: "44px",
-              minHeight: "44px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              lineHeight: 1,
+              position: "fixed",
+              top: "64px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 150,
+              maxWidth: "calc(100vw - 2rem)",
+              width: "max-content",
             }}
-            aria-label="Dismiss"
           >
-            ×
-          </button>
-        </div>
-      )}
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.95 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              style={{
+                background: "rgba(10,14,20,0.92)",
+                border: `1px solid ${selectedMarker.color}44`,
+                borderLeft: `3px solid ${selectedMarker.color}`,
+                borderRadius: "4px",
+                padding: "10px 16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                backdropFilter: "blur(10px)",
+                WebkitBackdropFilter: "blur(10px)",
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    color: selectedMarker.color,
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  {selectedMarker.label}
+                </div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "10px",
+                    color: "#6b7a8d",
+                    marginTop: "2px",
+                  }}
+                >
+                  {selectedMarker.subLabel}
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedMarker(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "#3d4f63",
+                  padding: 0,
+                  minWidth: "44px",
+                  minHeight: "44px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  lineHeight: 1,
+                  transition: "color 0.12s",
+                }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#e2e8f0")}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#3d4f63")}
+                aria-label="Dismiss"
+              >
+                <IconClose size={16} />
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <WelcomeTour />
     </>
