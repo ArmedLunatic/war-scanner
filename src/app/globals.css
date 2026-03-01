@@ -423,3 +423,13 @@ body.crt-mode::after {
 .warspy-tooltip-wrap:hover .warspy-tooltip {
   opacity: 1 !important;
 }
+
+/* ─── Skeleton Loading ────────────────────────────────────────────────────── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.skeleton-pulse {
+  animation: skeleton-pulse 1.2s ease-in-out infinite;
+}
