@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePanels } from "@/lib/context/PanelContext";
@@ -11,6 +12,7 @@ import {
   WARSPY_X_COMMUNITY_URL,
 } from "@/config";
 import { Tooltip } from "@/components/Tooltip";
+import { IconRadar, IconChat, IconBrief, IconTrend, IconSearch } from "@/components/icons";
 
 // ─── THREATCON Meter ─────────────────────────────────────────────────────────
 const THREATCON_LABELS = ["", "ALPHA", "BRAVO", "CHARLIE", "DELTA", "ECHO"];
@@ -136,16 +138,16 @@ function CrtToggle() {
 
 interface PanelToggle {
   id: PanelId;
-  icon: string;
+  IconComponent: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   label: string;
   subtitle: string;
 }
 
 const PANEL_TOGGLES: PanelToggle[] = [
-  { id: "live", icon: "📡", label: "Live Events", subtitle: "Real-time conflict updates" },
-  { id: "social", icon: "💬", label: "Social Feed", subtitle: "News, Reddit, Telegram" },
-  { id: "brief", icon: "📋", label: "Daily Brief", subtitle: "Top events last 12 hours" },
-  { id: "escalation", icon: "📈", label: "Threat Index", subtitle: "30-day escalation trend" },
+  { id: "live", IconComponent: IconRadar, label: "Live Events", subtitle: "Real-time conflict updates" },
+  { id: "social", IconComponent: IconChat, label: "Social Feed", subtitle: "News, Reddit, Telegram" },
+  { id: "brief", IconComponent: IconBrief, label: "Daily Brief", subtitle: "Top events last 12 hours" },
+  { id: "escalation", IconComponent: IconTrend, label: "Threat Index", subtitle: "30-day escalation trend" },
 ];
 
 const NAV_LINKS = [
@@ -163,6 +165,7 @@ const NAV_LINKS = [
 
 export function OverlayNav() {
   const { toggle, isOpen } = usePanels();
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isCompactDesktop, setIsCompactDesktop] = useState(false);
 
@@ -292,6 +295,7 @@ export function OverlayNav() {
           {NAV_LINKS.map((link, i) => {
             const prevGroup = i > 0 ? NAV_LINKS[i - 1].group : link.group;
             const showDivider = i > 0 && link.group !== prevGroup;
+            const isActive = pathname === link.href;
             return (
               <Fragment key={link.href}>
                 {showDivider && (
@@ -310,17 +314,25 @@ export function OverlayNav() {
                     fontWeight: link.accent ? 700 : 500,
                     letterSpacing: isCompactDesktop ? "0.08em" : "0.1em",
                     textTransform: "uppercase",
-                    color: link.accent ? "var(--accent-red)" : "var(--text-muted)",
+                    color: isActive && !link.accent
+                      ? "#e2e8f0"
+                      : link.accent
+                        ? "var(--accent-red)"
+                        : "var(--text-muted)",
                     textDecoration: "none",
                     whiteSpace: "nowrap",
                     transition: "color 0.12s",
+                    borderBottom: isActive
+                      ? `2px solid ${link.accent ? "var(--accent-red)" : "var(--accent-blue)"}`
+                      : undefined,
+                    paddingBottom: isActive ? "2px" : undefined,
                   }}
                   onMouseEnter={(e) => {
-                    if (!link.accent)
+                    if (!isActive && !link.accent)
                       (e.currentTarget as HTMLElement).style.color = "#e2e8f0";
                   }}
                   onMouseLeave={(e) => {
-                    if (!link.accent)
+                    if (!isActive && !link.accent)
                       (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
                   }}
                 >
@@ -365,7 +377,7 @@ export function OverlayNav() {
                     gap: "4px",
                   }}
                 >
-                  <span>{pt.icon}</span>
+                  <pt.IconComponent size={14} style={{ opacity: 0.8 }} />
                   {!isCompactDesktop && (
                     <span
                       className="desktop-only"
@@ -410,7 +422,7 @@ export function OverlayNav() {
             onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "rgba(96,165,250,0.4)")}
             onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "rgba(45,63,84,0.7)")}
           >
-            <span style={{ fontSize: "12px", color: "#3d4f63" }}>🔍</span>
+            <IconSearch size={12} style={{ color: "#3d4f63" }} />
             <span style={{
               fontFamily: "var(--font-mono)",
               fontSize: "10px",
@@ -547,7 +559,7 @@ export function OverlayNav() {
                     cursor: "pointer",
                   }}
                 >
-                  🔍 Search intel, locations...
+                  <IconSearch size={12} /> Search intel, locations...
                 </button>
               </div>
 
@@ -639,7 +651,7 @@ export function OverlayNav() {
                       width: "100%",
                     }}
                   >
-                    <span style={{ fontSize: "14px" }}>{pt.icon}</span>
+                    <pt.IconComponent size={14} style={{ opacity: 0.8 }} />
                     <div style={{ textAlign: "left" }}>
                       <div style={{
                         fontFamily: "var(--font-mono)",
@@ -677,29 +689,40 @@ export function OverlayNav() {
                   }}>
                     {group}
                   </div>
-                  {NAV_LINKS.filter((l) => l.group === group).map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setMenuOpen(false)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "0 20px",
-                        height: "48px",
-                        fontFamily: "var(--font-mono)",
-                        fontSize: "11px",
-                        fontWeight: link.accent ? 700 : 500,
-                        letterSpacing: "0.1em",
-                        textTransform: "uppercase",
-                        color: link.accent ? "var(--accent-red)" : "var(--text-secondary)",
-                        textDecoration: "none",
-                        borderBottom: "1px solid rgba(30,42,56,0.3)",
-                      }}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
+                  {NAV_LINKS.filter((l) => l.group === group).map((link) => {
+                    const isActive = pathname === link.href;
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMenuOpen(false)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          padding: "0 20px",
+                          height: "48px",
+                          fontFamily: "var(--font-mono)",
+                          fontSize: "11px",
+                          fontWeight: link.accent ? 700 : 500,
+                          letterSpacing: "0.1em",
+                          textTransform: "uppercase",
+                          color: isActive && !link.accent
+                            ? "var(--text-primary)"
+                            : link.accent
+                              ? "var(--accent-red)"
+                              : "var(--text-secondary)",
+                          textDecoration: "none",
+                          borderBottom: "1px solid rgba(30,42,56,0.3)",
+                          borderLeft: isActive
+                            ? `3px solid ${link.accent ? "var(--accent-red)" : "var(--accent-blue)"}`
+                            : "3px solid transparent",
+                          background: isActive ? "rgba(96,165,250,0.06)" : "transparent",
+                        }}
+                      >
+                        {link.label}
+                      </Link>
+                    );
+                  })}
                 </div>
               ))}
             </motion.nav>
