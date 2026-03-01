@@ -1,0 +1,21 @@
+"use client";
+import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
+
+export function PageTransition({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  // Globe page has its own full-screen composition — skip transition
+  if (pathname === "/") return <>{children}</>;
+
+  return (
+    <motion.div
+      key={pathname}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.15, ease: "easeOut" }}
+    >
+      {children}
+    </motion.div>
+  );
+}

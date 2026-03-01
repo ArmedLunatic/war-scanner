@@ -4,6 +4,7 @@ import "./globals.css";
 import { PanelProvider } from "@/lib/context/PanelContext";
 import { OverlayNav } from "@/components/nav/OverlayNav";
 import { CommandPalette } from "@/components/CommandPalette";
+import { PageTransition } from "@/components/PageTransition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -64,7 +65,7 @@ export default function RootLayout({
         <PanelProvider>
           <OverlayNav />
           <CommandPalette />
-          {children}
+          <PageTransition>{children}</PageTransition>
         </PanelProvider>
       </body>
     </html>
