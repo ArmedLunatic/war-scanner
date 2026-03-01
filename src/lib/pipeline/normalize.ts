@@ -1,6 +1,7 @@
 import { getServerClient } from "@/lib/supabase";
 import { CATEGORY_KEYWORDS, ACTOR_DICT, INGEST_WINDOW_HOURS } from "@/lib/constants";
 import { extractKeywords, extractActors } from "@/lib/utils/text";
+import { translateBatch } from "@/lib/utils/translate";
 import type { RawItem } from "@/lib/types";
 
 const CHUNK_SIZE = 50;
@@ -49,16 +50,27 @@ export async function normalizeNewItems(): Promise<number> {
   for (let i = 0; i < toNormalize.length; i += CHUNK_SIZE) {
     const chunk = toNormalize.slice(i, i + CHUNK_SIZE);
 
+    // Translate non-English titles/snippets before classification
+    const textsToTranslate = chunk.flatMap((raw) =>
+      [raw.title, raw.snippet].filter((t): t is string => Boolean(t)),
+    );
+    const translations = await translateBatch(textsToTranslate);
+
     const candidates = chunk.map((raw) => {
-      const fullText = [raw.title, raw.snippet].filter(Boolean).join(" ");
+      const title = translations.get(raw.title) ?? raw.title;
+      const snippet = raw.snippet
+        ? (translations.get(raw.snippet) ?? raw.snippet)
+        : null;
+
+      const fullText = [title, snippet].filter(Boolean).join(" ");
       const category = classifyCategory(fullText);
       const keywords = extractKeywords(fullText, 20);
       const actors = extractActors(fullText, ACTOR_DICT);
 
       return {
         raw_item_id: raw.id,
-        title: raw.title,
-        snippet: raw.snippet ?? null,
+        title,
+        snippet,
         url: raw.url,
         source_domain: raw.source_domain ?? null,
         country: raw.country ?? null,

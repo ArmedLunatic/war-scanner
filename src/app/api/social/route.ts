@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchAllSocialSources } from "@/lib/ingest/providers/socialFeeds";
+import { translateBatch } from "@/lib/utils/translate";
 import type { SocialResponse } from "@/lib/types";
 
 // In-memory cache
@@ -19,8 +20,16 @@ export async function GET() {
 
     const { posts, activeSources } = await fetchAllSocialSources();
 
+    // Translate non-English post text to English
+    const postTexts = posts.map((p) => p.text).filter(Boolean);
+    const translations = await translateBatch(postTexts);
+    const translatedPosts = posts.map((p) => ({
+      ...p,
+      text: translations.get(p.text) ?? p.text,
+    }));
+
     const response: SocialResponse = {
-      posts,
+      posts: translatedPosts,
       generatedAt: new Date().toISOString(),
       sources: activeSources,
     };

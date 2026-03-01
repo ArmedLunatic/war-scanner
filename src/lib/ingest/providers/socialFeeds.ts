@@ -1,10 +1,46 @@
 import type { SocialPost } from "@/lib/types";
 
 // Keywords for RSS/Google News filtering
+// Includes Arabic, Hebrew, Russian, and Farsi variants to catch non-English posts
 const KEYWORDS = [
+  // English
   "israel", "iran", "idf", "irgc", "hezbollah", "hamas", "houthi",
   "gaza", "nuclear", "missile", "netanyahu", "tehran", "tel aviv",
   "beirut", "sanaa", "ballistic", "drone", "airstrike",
+  // Arabic
+  "\u0625\u0633\u0631\u0627\u0626\u064A\u0644",       // إسرائيل
+  "\u0625\u064A\u0631\u0627\u0646",                     // إيران
+  "\u063A\u0632\u0629",                                 // غزة
+  "\u062D\u0645\u0627\u0633",                           // حماس
+  "\u062D\u0632\u0628 \u0627\u0644\u0644\u0647",       // حزب الله
+  "\u0627\u0644\u062D\u0648\u062B\u064A",               // الحوثي
+  "\u0635\u0627\u0631\u0648\u062E",                     // صاروخ (missile)
+  "\u0647\u062C\u0648\u0645",                           // هجوم (attack)
+  "\u0646\u0648\u0648\u064A",                           // نووي (nuclear)
+  "\u0637\u0647\u0631\u0627\u0646",                     // طهران (Tehran)
+  // Hebrew
+  "\u05D9\u05E9\u05E8\u05D0\u05DC",                     // ישראל
+  "\u05D0\u05D9\u05E8\u05D0\u05DF",                     // איראן
+  "\u05E2\u05D6\u05D4",                                 // עזה (Gaza)
+  "\u05D7\u05DE\u05D0\u05E1",                           // חמאס
+  "\u05D7\u05D9\u05D6\u05D1\u05D0\u05DC\u05D4",         // חיזבאלה
+  "\u05E6\u05D4\u05F4\u05DC",                           // צה״ל (IDF)
+  "\u05D8\u05D9\u05DC",                                 // טיל (missile)
+  "\u05D2\u05E8\u05E2\u05D9\u05E0\u05D9",               // גרעיני (nuclear)
+  // Russian
+  "\u0418\u0437\u0440\u0430\u0438\u043B\u044C",         // Израиль
+  "\u0418\u0440\u0430\u043D",                           // Иран
+  "\u0413\u0430\u0437\u0430",                           // Газа
+  "\u0425\u0430\u043C\u0430\u0441",                     // Хамас
+  "\u0425\u0435\u0437\u0431\u043E\u043B\u043B\u0430",   // Хезболла
+  "\u0440\u0430\u043A\u0435\u0442\u0430",               // ракета (missile)
+  "\u044F\u0434\u0435\u0440\u043D\u044B\u0439",         // ядерный (nuclear)
+  "\u0422\u0435\u0433\u0435\u0440\u0430\u043D",         // Тегеран (Tehran)
+  // Farsi
+  "\u0627\u0633\u0631\u0627\u0626\u06CC\u0644",         // اسرائیل (Israel, Farsi)
+  "\u0627\u06CC\u0631\u0627\u0646",                     // ایران (Iran, Farsi)
+  "\u0645\u0648\u0634\u06A9",                           // موشک (missile, Farsi)
+  "\u0647\u0633\u062A\u0647\u200C\u0627\u06CC",         // هسته‌ای (nuclear, Farsi)
 ];
 
 function matchesKeywords(text: string): boolean {

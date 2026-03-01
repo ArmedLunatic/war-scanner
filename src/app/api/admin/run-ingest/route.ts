@@ -21,38 +21,88 @@ function verifyToken(expected: string, actual: string): boolean {
   }
 }
 
-async function runPipeline(): Promise<{
+interface PipelineStats {
   inserted: number;
   skipped: number;
   normalized: number;
   clustersCreated: number;
   clustersUpdated: number;
-}> {
-  const ingestResult = await runAllProviders();
-  console.log(`[ingest] Ingest: inserted=${ingestResult.inserted}, skipped=${ingestResult.skipped}`);
+  errors: string[];
+}
 
-  const normalized = await normalizeNewItems();
-  console.log(`[ingest] Normalized: ${normalized}`);
-
-  const clusterResult = await clusterNewCandidates();
-  console.log(`[ingest] Clusters: created=${clusterResult.created}, attached=${clusterResult.attached}`);
-
-  await scoreAllClusters();
-  console.log("[ingest] Scored clusters");
-
-  await summarizeAllClusters();
-  console.log("[ingest] Summarized clusters");
-
-  await publishFeedCache();
-  console.log("[ingest] Feed cache published");
-
-  return {
-    inserted: ingestResult.inserted,
-    skipped: ingestResult.skipped,
-    normalized,
-    clustersCreated: clusterResult.created,
-    clustersUpdated: clusterResult.attached,
+async function runPipeline(): Promise<PipelineStats> {
+  const stats: PipelineStats = {
+    inserted: 0,
+    skipped: 0,
+    normalized: 0,
+    clustersCreated: 0,
+    clustersUpdated: 0,
+    errors: [],
   };
+
+  // Step 1: Ingest — critical, abort if this fails entirely
+  const ingestResult = await runAllProviders();
+  stats.inserted = ingestResult.inserted;
+  stats.skipped = ingestResult.skipped;
+  console.log(`[ingest] Ingest: inserted=${stats.inserted}, skipped=${stats.skipped}`);
+
+  // Step 2: Normalize — isolated
+  try {
+    stats.normalized = await normalizeNewItems();
+    console.log(`[ingest] Normalized: ${stats.normalized}`);
+  } catch (err) {
+    const msg = `normalize failed: ${err instanceof Error ? err.message : String(err)}`;
+    console.error(`[ingest] ${msg}`);
+    stats.errors.push(msg);
+  }
+
+  // Step 3: Cluster — isolated
+  try {
+    const clusterResult = await clusterNewCandidates();
+    stats.clustersCreated = clusterResult.created;
+    stats.clustersUpdated = clusterResult.attached;
+    console.log(`[ingest] Clusters: created=${stats.clustersCreated}, attached=${stats.clustersUpdated}`);
+  } catch (err) {
+    const msg = `cluster failed: ${err instanceof Error ? err.message : String(err)}`;
+    console.error(`[ingest] ${msg}`);
+    stats.errors.push(msg);
+  }
+
+  // Step 4: Score — isolated
+  try {
+    await scoreAllClusters();
+    console.log("[ingest] Scored clusters");
+  } catch (err) {
+    const msg = `score failed: ${err instanceof Error ? err.message : String(err)}`;
+    console.error(`[ingest] ${msg}`);
+    stats.errors.push(msg);
+  }
+
+  // Step 5: Summarize — isolated
+  try {
+    await summarizeAllClusters();
+    console.log("[ingest] Summarized clusters");
+  } catch (err) {
+    const msg = `summarize failed: ${err instanceof Error ? err.message : String(err)}`;
+    console.error(`[ingest] ${msg}`);
+    stats.errors.push(msg);
+  }
+
+  // Step 6: Publish — isolated (most important for frontend freshness)
+  try {
+    await publishFeedCache();
+    console.log("[ingest] Feed cache published");
+  } catch (err) {
+    const msg = `publish failed: ${err instanceof Error ? err.message : String(err)}`;
+    console.error(`[ingest] ${msg}`);
+    stats.errors.push(msg);
+  }
+
+  if (stats.errors.length > 0) {
+    console.warn(`[ingest] Pipeline completed with ${stats.errors.length} error(s)`);
+  }
+
+  return stats;
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -75,13 +125,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 }
 
-// Support Vercel Cron (GET with no auth header, protected by cron secret)
+// Support Vercel Cron (GET with Authorization: Bearer <CRON_SECRET>)
+// Also accepts WAR_SCANNER_ADMIN_TOKEN as fallback for flexibility.
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const cronSecret = process.env.CRON_SECRET ?? "";
+  const adminToken = process.env.WAR_SCANNER_ADMIN_TOKEN ?? "";
   const authHeader = req.headers.get("Authorization") ?? "";
   const provided = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
 
-  if (!cronSecret || !verifyToken(cronSecret, provided)) {
+  const isAuthorized =
+    (cronSecret && verifyToken(cronSecret, provided)) ||
+    (adminToken && verifyToken(adminToken, provided));
+
+  if (!isAuthorized) {
+    console.warn("[ingest] Cron GET rejected — invalid or missing token");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
