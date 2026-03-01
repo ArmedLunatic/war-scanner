@@ -48,8 +48,6 @@ function ThreatconMeter() {
   return (
     <Tooltip text="Threat Condition — composite score based on event frequency and severity over 7 days">
       <div
-        className="desktop-only"
-        data-tour="step-threatcon"
         style={{
           display: "flex",
           alignItems: "center",
@@ -162,6 +160,41 @@ const NAV_LINKS = [
   { href: "/heatmap", label: "Heatmap", group: "reference" },
   { href: "/methodology", label: "Methodology", group: "reference" },
 ];
+
+function MobileStatusIndicator() {
+  const [status, setStatus] = useState<{ ok: boolean; totalClusters: number } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/status")
+      .then((r) => r.json())
+      .then(setStatus)
+      .catch(() => {});
+  }, []);
+
+  if (!status) return null;
+
+  return (
+    <div style={{
+      padding: "10px 20px",
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+      fontFamily: "var(--font-mono)",
+      fontSize: "9px",
+      color: "#3d4f63",
+      letterSpacing: "0.08em",
+    }}>
+      <span style={{
+        width: "5px",
+        height: "5px",
+        borderRadius: "50%",
+        background: status.ok ? "#22c55e" : "#e03e3e",
+        flexShrink: 0,
+      }} />
+      <span>{status.totalClusters} events tracked</span>
+    </div>
+  );
+}
 
 export function OverlayNav() {
   const { toggle, isOpen } = usePanels();
@@ -345,7 +378,11 @@ export function OverlayNav() {
 
         {/* Right: THREATCON + panel toggles + hamburger */}
         <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
-          {!isCompactDesktop && <ThreatconMeter />}
+          {!isCompactDesktop && (
+            <div className="desktop-only" data-tour="step-threatcon">
+              <ThreatconMeter />
+            </div>
+          )}
           {/* Panel toggles — always visible */}
           <div data-tour="step-panels" style={{ display: "flex", gap: "5px", alignItems: "center" }}>
             {PANEL_TOGGLES.map((pt) => {
@@ -616,6 +653,17 @@ export function OverlayNav() {
                 </a>
               </div>
 
+              {/* THREATCON in drawer */}
+              <div style={{
+                padding: "10px 20px",
+                borderBottom: "1px solid rgba(30,42,56,0.5)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}>
+                <ThreatconMeter />
+              </div>
+
               <div
                 style={{
                   display: "flex",
@@ -725,6 +773,8 @@ export function OverlayNav() {
                   })}
                 </div>
               ))}
+
+              <MobileStatusIndicator />
             </motion.nav>
           </>
         )}
